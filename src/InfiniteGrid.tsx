@@ -10,6 +10,7 @@ export default function InfiniteGrid() {
   const timeoutsRef = React.useRef(new Map<string, number>());
   
   const parentRef = React.useRef<HTMLDivElement>(null);
+  
 
   // Sample image URLs
   const sampleImages = [
@@ -138,15 +139,85 @@ export default function InfiniteGrid() {
       timeoutsRef.current.clear();
     };
   }, []);
+  
+  // Custom smooth diagonal scrolling
+  React.useEffect(() => {
+    const container = parentRef.current;
+    if (!container) return;
+    
+    // Custom diagonal wheel handling with smooth interpolation
+    let targetScrollX = container.scrollLeft;
+    let targetScrollY = container.scrollTop;
+    let isAnimating = false;
+    
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      
+      // Update target positions based on wheel deltas
+      targetScrollX += e.deltaX;
+      targetScrollY += e.deltaY;
+      
+      // Clamp values to scroll bounds
+      const maxScrollX = container.scrollWidth - container.clientWidth;
+      const maxScrollY = container.scrollHeight - container.clientHeight;
+      
+      targetScrollX = Math.max(0, Math.min(maxScrollX, targetScrollX));
+      targetScrollY = Math.max(0, Math.min(maxScrollY, targetScrollY));
+      
+      if (!isAnimating) {
+        isAnimating = true;
+        animateScroll();
+      }
+    };
+    
+    // Smooth animation loop using linear interpolation
+    const animateScroll = () => {
+      const currentX = container.scrollLeft;
+      const currentY = container.scrollTop;
+      
+      // Linear interpolation for smooth scrolling
+      const lerp = 0.2;
+      const newX = currentX + (targetScrollX - currentX) * lerp;
+      const newY = currentY + (targetScrollY - currentY) * lerp;
+      
+      container.scrollLeft = newX;
+      container.scrollTop = newY;
+      
+      // Continue animation if we haven't reached the target
+      const deltaX = Math.abs(targetScrollX - newX);
+      const deltaY = Math.abs(targetScrollY - newY);
+      
+      if (deltaX > 0.5 || deltaY > 0.5) {
+        requestAnimationFrame(animateScroll);
+      } else {
+        isAnimating = false;
+        // Snap to final position
+        container.scrollLeft = targetScrollX;
+        container.scrollTop = targetScrollY;
+      }
+    };
+    
+    // Add wheel listener with preventDefault
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
+  
+  
+  
 
   return (
     <div className=" py-12 px-6 h-dvh w-dvw flex justify-center items-center">
       <div 
         ref={parentRef}
-        className="h-full w-full"
+        className="h-full w-full overflow-auto"
         style={{
           overflow: 'auto',
           WebkitOverflowScrolling: 'touch',
+          overscrollBehavior: 'contain',
+          touchAction: 'pan-x pan-y', // Enable native diagonal touch scrolling
           border: '2px solid #fff',
           borderRadius: '12px',
           backgroundColor: '#fff',
