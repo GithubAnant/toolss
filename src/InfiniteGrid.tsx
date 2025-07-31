@@ -5,18 +5,20 @@ export default function InfiniteGrid() {
   const [rowCount, setRowCount] = React.useState(10);
   const [colCount, setColCount] = React.useState(10);
   
-  // Track which cells are currently visible
+  // Track which cells are currently visible and animated
   const [visibleCells, setVisibleCells] = React.useState(new Set<string>());
+  const [animatedCells, setAnimatedCells] = React.useState(new Set<string>());
+  const timeoutsRef = React.useRef(new Map<string, NodeJS.Timeout>());
   
   const parentRef = React.useRef<HTMLDivElement>(null);
 
-  // Generate fixed sizes for consistent infinite scrolling
+  // Generate fixed sizes for consistent infinite scrolling (including 2px gap)
   const rows = React.useMemo(() => 
-    new Array(rowCount).fill(200), 
+    new Array(rowCount).fill(202), 
     [rowCount]
   );
   const columns = React.useMemo(() => 
-    new Array(colCount).fill(200), 
+    new Array(colCount).fill(202), 
     [colCount]
   );
 
@@ -28,14 +30,14 @@ export default function InfiniteGrid() {
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: (i) => rows[i] || 200,
+    estimateSize: (i) => rows[i] || 202,
     overscan: 1,
   });
 
   const columnVirtualizer = useVirtualizer({
     count: colCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: (i) => columns[i] || 200,
+    estimateSize: (i) => columns[i] || 202,
     overscan: 1,
     horizontal: true,
   });
@@ -55,10 +57,43 @@ export default function InfiniteGrid() {
     return keys;
   }, [virtualRows, virtualColumns]);
 
-  // Update visible cells set
+  // Update visible cells set and handle staggered animation
   React.useEffect(() => {
     setVisibleCells(visibleCellKeys);
-  }, [visibleCellKeys]);
+    
+    // Clear existing timeouts for cells that are no longer visible
+    const currentTimeouts = timeoutsRef.current;
+    currentTimeouts.forEach((timeout, cellKey) => {
+      if (!visibleCellKeys.has(cellKey)) {
+        clearTimeout(timeout);
+        currentTimeouts.delete(cellKey);
+      }
+    });
+    
+    // Set up staggered animation for new visible cells
+    const newVisibleCells = Array.from(visibleCellKeys);
+    newVisibleCells.forEach((cellKey, index) => {
+      if (!animatedCells.has(cellKey) && !currentTimeouts.has(cellKey)) {
+        const delay = index * 20; // 50ms stagger between cells
+        const timeout = setTimeout(() => {
+          setAnimatedCells(prev => new Set(prev).add(cellKey));
+          currentTimeouts.delete(cellKey);
+        }, delay);
+        currentTimeouts.set(cellKey, timeout);
+      }
+    });
+    
+    // Clean up animated cells that are no longer visible
+    setAnimatedCells(prev => {
+      const newAnimated = new Set<string>();
+      prev.forEach(cellKey => {
+        if (visibleCellKeys.has(cellKey)) {
+          newAnimated.add(cellKey);
+        }
+      });
+      return newAnimated;
+    });
+  }, [visibleCellKeys, animatedCells]);
 
   // Infinite scrolling logic
   React.useEffect(() => {
@@ -77,6 +112,14 @@ export default function InfiniteGrid() {
       setColCount((old) => old + 10);
     }
   }, [virtualRows, virtualColumns, rowCount, colCount]);
+
+  // Cleanup timeouts on unmount
+  React.useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+      timeoutsRef.current.clear();
+    };
+  }, []);
 
   return (
     <div className="container" style={{ 
@@ -125,6 +168,7 @@ export default function InfiniteGrid() {
               {virtualColumns.map((virtualColumn) => {
                 const cellKey = `${virtualRow.index}-${virtualColumn.index}`;
                 const isVisible = visibleCells.has(cellKey);
+                const isAnimated = animatedCells.has(cellKey);
                 
                 return (
                   <div
@@ -134,8 +178,8 @@ export default function InfiniteGrid() {
                       position: 'absolute',
                       top: 0,
                       left: 0,
-                      width: `${virtualColumn.size}px`,
-                      height: `${virtualRow.size}px`,
+                      width: `${virtualColumn.size - 2}px`,
+                      height: `${virtualRow.size - 2}px`,
                       backgroundColor: getStableColor(virtualRow.index, virtualColumn.index),
                       display: 'flex',
                       alignItems: 'center',
@@ -147,13 +191,13 @@ export default function InfiniteGrid() {
                       border: '1px solid rgba(255,255,255,0.3)',
                       boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                       
-                      // Transform with blur-fade animation - no stagger
-                      transform: `translateX(${virtualColumn.start}px) translateY(${virtualRow.start}px) scale(${isVisible ? 1 : 0.0})`,
-                      opacity: isVisible ? 1 : 0,
-                      filter: isVisible ? 'blur(0px)' : 'blur(8px)',
+                      // Transform with blur-fade animation based on animated state
+                      transform: `translateX(${virtualColumn.start + 1}px) translateY(${virtualRow.start + 1}px) scale(${isAnimated ? 1 : 0.0})`,
+                      opacity: isAnimated ? 1 : 0,
+                      filter: isAnimated ? 'blur(0px)' : 'blur(8px)',
                       
-                      // Immediate transition when cell becomes visible
-                      transition: 'all 1s cubic-bezier(0.175, 0.885, 0.32, 1)',
+                      // Smooth transition when cell becomes animated
+                      transition: 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1)',
                     }}
                   >
                     Cell {virtualRow.index}, {virtualColumn.index}
