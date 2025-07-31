@@ -6,6 +6,16 @@ export function InfiniteGrid() {
   const [colCount, setColCount] = React.useState(20);
   const parentRef = React.useRef<HTMLDivElement>(null);
 
+  // Generate fixed sizes for consistent infinite scrolling
+  const rows = React.useMemo(() => 
+    new Array(rowCount).fill(200), 
+    [rowCount]
+  );
+  const columns = React.useMemo(() => 
+    new Array(colCount).fill(200), 
+    [colCount]
+  );
+
   const getStableColor = (row: number, col: number) => {
     const hash = (row * 1000 + col) % 360;
     return `hsl(${hash}, 70%, 80%)`;
@@ -14,44 +24,56 @@ export function InfiniteGrid() {
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 200,
+    estimateSize: (i) => rows[i] || 200,
     overscan: 5,
-    gap: 16,
-    onChange: (instance, sync) => {
-      if (!sync) {
-        const items = instance.getVirtualItems();
-        if (items.length) {
-          const lastIndex = items[items.length - 1].index;
-          if (lastIndex >= rowCount - 3) {
-            setRowCount((old) => old + 5);
-          }
-        }
-      }
-    },
   });
 
   const columnVirtualizer = useVirtualizer({
     count: colCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 200,
+    estimateSize: (i) => columns[i] || 200,
     overscan: 5,
     horizontal: true,
-    gap: 16,
-    onChange: (instance, sync) => {
-      if (!sync) {
-        const items = instance.getVirtualItems();
-        if (items.length) {
-          const lastIndex = items[items.length - 1].index;
-          if (lastIndex >= colCount - 3) {
-            setColCount((old) => old + 5);
-          }
-        }
-      }
-    },
   });
 
+  // Infinite scrolling logic from the React Query example
+  React.useEffect(() => {
+    const [lastRowItem] = [...rowVirtualizer.getVirtualItems()].reverse();
+    const [lastColItem] = [...columnVirtualizer.getVirtualItems()].reverse();
+
+    if (!lastRowItem || !lastColItem) {
+      return;
+    }
+
+    // Load more rows when approaching the end
+    if (lastRowItem.index >= rowCount - 5) {
+      setRowCount((old) => old + 10);
+    }
+
+    // Load more columns when approaching the end
+    if (lastColItem.index >= colCount - 5) {
+      setColCount((old) => old + 10);
+    }
+  }, [
+    rowVirtualizer.getVirtualItems(),
+    columnVirtualizer.getVirtualItems(),
+    rowCount,
+    colCount,
+  ]);
+
   return (
-    <div ref={parentRef} className="grid-container">
+    <div 
+      ref={parentRef}
+      className="List"
+      style={{
+        height: '100vh',
+        width: '100vw',
+        overflow: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        scrollSnapType: 'both proximity',
+        border: '1px solid #e6e4dc',
+      }}
+    >
       <div
         style={{
           height: `${rowVirtualizer.getTotalSize()}px`,
@@ -69,10 +91,11 @@ export function InfiniteGrid() {
                   position: 'absolute',
                   top: 0,
                   left: 0,
-                  width: `${virtualColumn.size}px`,
-                  height: `${virtualRow.size}px`,
+                  width: `${columns[virtualColumn.index]}px`,
+                  height: `${rows[virtualRow.index]}px`,
                   transform: `translateX(${virtualColumn.start}px) translateY(${virtualRow.start}px)`,
                   backgroundColor: getStableColor(virtualRow.index, virtualColumn.index),
+                  scrollSnapAlign: 'start',
                 }}
               >
                 Cell {virtualRow.index}, {virtualColumn.index}
