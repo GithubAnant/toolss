@@ -1,0 +1,25 @@
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.grid-container {
+  border: 1px solid lightgray;
+  padding: 1rem;
+  height: 90vh;
+  overflow: auto;
+  scroll-snap-type: both mandatory;
+  scroll-padding: 1rem;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+.grid-cell {
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
