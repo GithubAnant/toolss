@@ -5,8 +5,8 @@ export default function InfiniteGrid() {
   const [rowCount, setRowCount] = React.useState(10);
   const [colCount, setColCount] = React.useState(10);
   
-  // Track which cells have been animated
-  const animatedCells = React.useRef(new Set<string>());
+  // Track which cells are currently visible
+  const [visibleCells, setVisibleCells] = React.useState(new Set<string>());
   
   const parentRef = React.useRef<HTMLDivElement>(null);
 
@@ -29,14 +29,14 @@ export default function InfiniteGrid() {
     count: rowCount,
     getScrollElement: () => parentRef.current,
     estimateSize: (i) => rows[i] || 200,
-    overscan: 3,
+    overscan: 1,
   });
 
   const columnVirtualizer = useVirtualizer({
     count: colCount,
     getScrollElement: () => parentRef.current,
     estimateSize: (i) => columns[i] || 200,
-    overscan: 3,
+    overscan: 1,
     horizontal: true,
   });
 
@@ -55,13 +55,9 @@ export default function InfiniteGrid() {
     return keys;
   }, [virtualRows, virtualColumns]);
 
-  // Add newly visible cells to animated set
+  // Update visible cells set
   React.useEffect(() => {
-    visibleCellKeys.forEach(key => {
-      if (!animatedCells.current.has(key)) {
-        animatedCells.current.add(key);
-      }
-    });
+    setVisibleCells(visibleCellKeys);
   }, [visibleCellKeys]);
 
   // Infinite scrolling logic
@@ -128,7 +124,7 @@ export default function InfiniteGrid() {
             <React.Fragment key={virtualRow.key}>
               {virtualColumns.map((virtualColumn) => {
                 const cellKey = `${virtualRow.index}-${virtualColumn.index}`;
-                const hasAnimated = animatedCells.current.has(cellKey);
+                const isVisible = visibleCells.has(cellKey);
                 
                 return (
                   <div
@@ -152,12 +148,12 @@ export default function InfiniteGrid() {
                       boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                       
                       // Transform with blur-fade animation - no stagger
-                      transform: `translateX(${virtualColumn.start}px) translateY(${virtualRow.start}px) scale(${hasAnimated ? 1 : 0.95})`,
-                      opacity: hasAnimated ? 1 : 0,
-                      filter: hasAnimated ? 'blur(0px)' : 'blur(8px)',
+                      transform: `translateX(${virtualColumn.start}px) translateY(${virtualRow.start}px) scale(${isVisible ? 1 : 0.0})`,
+                      opacity: isVisible ? 1 : 0,
+                      filter: isVisible ? 'blur(0px)' : 'blur(8px)',
                       
                       // Immediate transition when cell becomes visible
-                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                      transition: 'all 1s cubic-bezier(0.175, 0.885, 0.32, 1)',
                     }}
                   >
                     Cell {virtualRow.index}, {virtualColumn.index}
