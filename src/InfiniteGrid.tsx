@@ -5,12 +5,36 @@ export default function InfiniteGrid() {
   const [rowCount, setRowCount] = React.useState(10);
   const [colCount, setColCount] = React.useState(10);
   
-  // Track which cells are currently visible and animated
-  const [visibleCells, setVisibleCells] = React.useState(new Set<string>());
+  // Track which cells are currently animated
   const [animatedCells, setAnimatedCells] = React.useState(new Set<string>());
-  const timeoutsRef = React.useRef(new Map<string, NodeJS.Timeout>());
+  const timeoutsRef = React.useRef(new Map<string, number>());
   
   const parentRef = React.useRef<HTMLDivElement>(null);
+
+  // Sample image URLs
+  const sampleImages = [
+    "https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687221038-404cb8830901?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687218608-5e2522b04673?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687220199-d0124f48f95b?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687219356-e820ca126c92?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687220063-4742bd7fd538?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687220566-5599dbbebf11?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687221073-53ad74c2cad7?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687219640-b3f11f4b7234?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687220923-c58b9a4592ae?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687221080-5cb261c645cb?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687220208-22d7a2543e88?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687221213-56e250b36fdd?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687220336-bbd659a734e7?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1682687221248-3116ba6ab483?w=400&h=400&fit=crop"
+  ];
+
+  // Get image for a specific cell
+  const getImageForCell = (row: number, col: number) => {
+    const index = (row * 1000 + col) % sampleImages.length;
+    return sampleImages[index];
+  };
 
   // Generate fixed sizes for consistent infinite scrolling (including 2px gap)
   const rows = React.useMemo(() => 
@@ -22,10 +46,6 @@ export default function InfiniteGrid() {
     [colCount]
   );
 
-  const getStableColor = (row: number, col: number) => {
-    const hash = (row * 1000 + col) % 360;
-    return `hsl(${hash}, 70%, 80%)`;
-  };
 
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
@@ -57,10 +77,8 @@ export default function InfiniteGrid() {
     return keys;
   }, [virtualRows, virtualColumns]);
 
-  // Update visible cells set and handle staggered animation
+  // Handle staggered animation for visible cells
   React.useEffect(() => {
-    setVisibleCells(visibleCellKeys);
-    
     // Clear existing timeouts for cells that are no longer visible
     const currentTimeouts = timeoutsRef.current;
     currentTimeouts.forEach((timeout, cellKey) => {
@@ -73,8 +91,8 @@ export default function InfiniteGrid() {
     // Set up staggered animation for new visible cells
     const newVisibleCells = Array.from(visibleCellKeys);
     newVisibleCells.forEach((cellKey, index) => {
-      if (!animatedCells.has(cellKey) && !currentTimeouts.has(cellKey)) {
-        const delay = index * 20; // 50ms stagger between cells
+      if (!currentTimeouts.has(cellKey)) {
+        const delay = index * 20;
         const timeout = setTimeout(() => {
           setAnimatedCells(prev => new Set(prev).add(cellKey));
           currentTimeouts.delete(cellKey);
@@ -93,7 +111,7 @@ export default function InfiniteGrid() {
       });
       return newAnimated;
     });
-  }, [visibleCellKeys, animatedCells]);
+  }, [visibleCellKeys]);
 
   // Infinite scrolling logic
   React.useEffect(() => {
@@ -167,7 +185,6 @@ export default function InfiniteGrid() {
             <React.Fragment key={virtualRow.key}>
               {virtualColumns.map((virtualColumn) => {
                 const cellKey = `${virtualRow.index}-${virtualColumn.index}`;
-                const isVisible = visibleCells.has(cellKey);
                 const isAnimated = animatedCells.has(cellKey);
                 
                 return (
@@ -180,15 +197,8 @@ export default function InfiniteGrid() {
                       left: 0,
                       width: `${virtualColumn.size - 2}px`,
                       height: `${virtualRow.size - 2}px`,
-                      backgroundColor: getStableColor(virtualRow.index, virtualColumn.index),
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: '#333',
                       borderRadius: '8px',
-                      border: '1px solid rgba(255,255,255,0.3)',
+                      overflow: 'hidden',
                       boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                       
                       // Transform with blur-fade animation based on animated state
@@ -200,7 +210,17 @@ export default function InfiniteGrid() {
                       transition: 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1)',
                     }}
                   >
-                    Cell {virtualRow.index}, {virtualColumn.index}
+                    <img
+                      src={getImageForCell(virtualRow.index, virtualColumn.index)}
+                      alt={`Cell ${virtualRow.index}, ${virtualColumn.index}`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
+                      loading="lazy"
+                    />
                   </div>
                 );
               })}
