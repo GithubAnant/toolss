@@ -1,4 +1,3 @@
-import './App.css'
 import  InfiniteGrid  from './InfiniteGrid'
 
 function App() {

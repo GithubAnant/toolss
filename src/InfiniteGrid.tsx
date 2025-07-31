@@ -140,34 +140,14 @@ export default function InfiniteGrid() {
   }, []);
 
   return (
-    <div className="container" style={{ 
-      width: '100vw', 
-      height: '100vh', 
-      padding: '20px',
-      background: '#f5f5f5',
-      boxSizing: 'border-box'
-    }}>
-      <div style={{ marginBottom: '20px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px' }}>
-          Infinite Virtual Grid with Animations
-        </h2>
-        <p style={{ color: '#666', marginBottom: '10px' }}>
-          Scroll in any direction to load more cells. Each cell animates when it enters the viewport.
-        </p>
-        <p style={{ fontSize: '14px', color: '#888' }}>
-          Grid size: {rowCount} rows × {colCount} columns = {rowCount * colCount} total cells
-        </p>
-      </div>
-      
+    <div className=" py-12 px-6 h-dvh w-dvw flex justify-center items-center">
       <div 
         ref={parentRef}
-        className="List"
+        className="h-full w-full"
         style={{
-          height: 'calc(100vh - 140px)',
-          width: '100%',
           overflow: 'auto',
           WebkitOverflowScrolling: 'touch',
-          border: '2px solid #ddd',
+          border: '2px solid #fff',
           borderRadius: '12px',
           backgroundColor: '#fff',
           boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
@@ -175,10 +155,12 @@ export default function InfiniteGrid() {
         }}
       >
         <div
+        
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
             width: `${columnVirtualizer.getTotalSize()}px`,
             position: 'relative',
+            
           }}
         >
           {virtualRows.map((virtualRow) => (
