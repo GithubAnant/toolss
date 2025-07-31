@@ -1,18 +1,27 @@
 #root {
-  width: 100%;
+  width: 100vw;
+  height: 100vh;
   margin: 0;
   padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .grid-container {
   border: 1px solid lightgray;
+  margin: 2rem;
   padding: 1rem;
-  height: 90vh;
+  width: calc(100vw - 4rem);
+  height: calc(100vh - 4rem);
   overflow: auto;
   scroll-snap-type: both mandatory;
   scroll-padding: 1rem;
   -webkit-overflow-scrolling: touch;
   position: relative;
+  touch-action: pan-x pan-y;
+  overscroll-behavior: contain;
+  scroll-behavior: auto;
 }
 
 .grid-cell {

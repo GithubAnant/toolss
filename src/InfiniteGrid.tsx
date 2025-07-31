@@ -1,10 +1,15 @@
 import * as React from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
-export function InfiniteGrid() {
+export function InfiniteGrid() {  
   const [rowCount, setRowCount] = React.useState(20);
   const [colCount, setColCount] = React.useState(20);
   const parentRef = React.useRef<HTMLDivElement>(null);
+
+  const getStableColor = (row: number, col: number) => {
+    const hash = (row * 1000 + col) % 360;
+    return `hsl(${hash}, 70%, 80%)`;
+  };
 
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
@@ -17,8 +22,8 @@ export function InfiniteGrid() {
         const items = instance.getVirtualItems();
         if (items.length) {
           const lastIndex = items[items.length - 1].index;
-          if (lastIndex >= rowCount - 5) {
-            setRowCount((old) => old + 10);
+          if (lastIndex >= rowCount - 3) {
+            setRowCount((old) => old + 5);
           }
         }
       }
@@ -37,8 +42,8 @@ export function InfiniteGrid() {
         const items = instance.getVirtualItems();
         if (items.length) {
           const lastIndex = items[items.length - 1].index;
-          if (lastIndex >= colCount - 5) {
-            setColCount((old) => old + 10);
+          if (lastIndex >= colCount - 3) {
+            setColCount((old) => old + 5);
           }
         }
       }
@@ -67,7 +72,7 @@ export function InfiniteGrid() {
                   width: `${virtualColumn.size}px`,
                   height: `${virtualRow.size}px`,
                   transform: `translateX(${virtualColumn.start}px) translateY(${virtualRow.start}px)`,
-                  backgroundColor: `hsl(${Math.random() * 360}, 70%, 80%)`,
+                  backgroundColor: getStableColor(virtualRow.index, virtualColumn.index),
                 }}
               >
                 Cell {virtualRow.index}, {virtualColumn.index}
