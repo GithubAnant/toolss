@@ -1,5 +1,5 @@
 import './App.css'
-import { InfiniteGrid } from './InfiniteGrid'
+import  InfiniteGrid  from './InfiniteGrid'
 
 function App() {
   return <InfiniteGrid />
