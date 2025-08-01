@@ -19,7 +19,17 @@
 import * as React from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
-export default function InfiniteGrid() {  
+interface SelectedImage {
+  url: string;
+  row: number;
+  col: number;
+}
+
+interface InfiniteGridProps {
+  onImageClick?: (imageData: SelectedImage) => void;
+}
+
+export default function InfiniteGrid({ onImageClick }: InfiniteGridProps) {  
   // Configuration
   const PADDING_X = 80; // Horizontal padding between images
   const PADDING_Y = 80; // Vertical padding between images
@@ -266,7 +276,7 @@ export default function InfiniteGrid() {
                 return (
                   <div
                     key={`${virtualRow.key}-${virtualColumn.key}`}
-                    className="grid-cell"
+                    className="grid-cell cursor-pointer"
                     style={{
                       position: 'absolute',
                       top: 0,
@@ -284,6 +294,15 @@ export default function InfiniteGrid() {
                       
                       // Smooth transition when cell becomes animated
                       transition: 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1)',
+                    }}
+                    onClick={() => {
+                      if (onImageClick && isAnimated) {
+                        onImageClick({
+                          url: getImageForCell(virtualRow.index, virtualColumn.index),
+                          row: virtualRow.index,
+                          col: virtualColumn.index
+                        });
+                      }
                     }}
                   >
                     <img
