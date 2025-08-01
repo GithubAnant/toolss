@@ -176,7 +176,7 @@ export default function InfiniteGrid() {
       const currentY = container.scrollTop;
       
       // Linear interpolation for smooth scrolling
-      const lerp = 0.2;
+      const lerp = .04;
       const newX = currentX + (targetScrollX - currentX) * lerp;
       const newY = currentY + (targetScrollY - currentY) * lerp;
       
