@@ -2,6 +2,10 @@ import * as React from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 export default function InfiniteGrid() {  
+  // Configuration
+  const PADDING_X = 80; // Horizontal padding between images
+  const PADDING_Y = 80; // Vertical padding between images
+  
   const [rowCount, setRowCount] = React.useState(10);
   const [colCount, setColCount] = React.useState(10);
   
@@ -37,28 +41,29 @@ export default function InfiniteGrid() {
     return sampleImages[index];
   };
 
-  // Generate fixed sizes for consistent infinite scrolling (including 2px gap)
+  // Generate fixed sizes for consistent infinite scrolling (including padding)
+  const cellSize = 200; // Base cell size
   const rows = React.useMemo(() => 
-    new Array(rowCount).fill(202), 
-    [rowCount]
+    new Array(rowCount).fill(cellSize + PADDING_Y), 
+    [rowCount, PADDING_Y]
   );
   const columns = React.useMemo(() => 
-    new Array(colCount).fill(202), 
-    [colCount]
+    new Array(colCount).fill(cellSize + PADDING_X), 
+    [colCount, PADDING_X]
   );
 
 
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: (i) => rows[i] || 202,
+    estimateSize: (i) => rows[i] || (cellSize + PADDING_Y),
     overscan: 1,
   });
 
   const columnVirtualizer = useVirtualizer({
     count: colCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: (i) => columns[i] || 202,
+    estimateSize: (i) => columns[i] || (cellSize + PADDING_X),
     overscan: 1,
     horizontal: true,
   });
@@ -123,12 +128,12 @@ export default function InfiniteGrid() {
 
     // Load more rows when approaching the end
     if (lastRowItem.index >= rowCount - 5) {
-      setRowCount((old) => old + 10);
+      setRowCount((old) => old + 1);
     }
 
     // Load more columns when approaching the end
     if (lastColItem.index >= colCount - 5) {
-      setColCount((old) => old + 10);
+      setColCount((old) => old + 1);
     }
   }, [virtualRows, virtualColumns, rowCount, colCount]);
 
@@ -248,14 +253,14 @@ export default function InfiniteGrid() {
                       position: 'absolute',
                       top: 0,
                       left: 0,
-                      width: `${virtualColumn.size - 2}px`,
-                      height: `${virtualRow.size - 2}px`,
+                      width: `${cellSize}px`,
+                      height: `${cellSize}px`,
                       borderRadius: '8px',
                       overflow: 'hidden',
                       boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                       
-                      // Transform with blur-fade animation based on animated state
-                      transform: `translateX(${virtualColumn.start + 1}px) translateY(${virtualRow.start + 1}px) scale(${isAnimated ? 1 : 0.0})`,
+                      // Transform with padding and blur-fade animation based on animated state
+                      transform: `translateX(${virtualColumn.start + PADDING_X/2}px) translateY(${virtualRow.start + PADDING_Y/2}px) scale(${isAnimated ? 1 : 0.0})`,
                       opacity: isAnimated ? 1 : 0,
                       filter: isAnimated ? 'blur(0px)' : 'blur(8px)',
                       
