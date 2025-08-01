@@ -1,3 +1,21 @@
+/**
+ * InfiniteGrid - Scrollable image grid with animations
+ * 
+ * What it does:
+ * • Shows images in a grid that scrolls forever
+ * • Images pop up with a scale animation (start small → grow to full size)
+ * • Only renders what you can see (using TanStack Virtual)
+ * 
+ * Performance:
+ * • 120 FPS for normal scrolling (up/down or left/right)
+ * • Diagonal scrolling is custom-coded (slightly laggy but feels better)
+ * 
+ * How it works:
+ * • Loads more rows/columns as you scroll near the edge
+ * • Each image animates in with a small delay (staggered effect)
+ * • Cleans up animations when images go off-screen
+ */
+
 import * as React from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
@@ -214,7 +232,7 @@ export default function InfiniteGrid() {
   
 
   return (
-    <div className=" py-12 px-6 h-dvh w-dvw flex justify-center items-center">
+    <div className="  h-dvh w-dvw flex justify-center items-center">
       <div 
         ref={parentRef}
         className="h-full w-full overflow-auto"
