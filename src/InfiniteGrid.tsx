@@ -27,10 +27,11 @@ interface SelectedImage {
 
 interface InfiniteGridProps {
   onImageClick?: (imageData: SelectedImage) => void;
-  animationType?: 'default' | 'polkadot';
+  animationType?: 'default' | 'polkadot' | 'disabled';
+  disableCustomScroll?: boolean;
 }
 
-export default function InfiniteGrid({ onImageClick, animationType = 'default' }: InfiniteGridProps) {  
+export default function InfiniteGrid({ onImageClick, animationType = 'default', disableCustomScroll = false }: InfiniteGridProps) {  
   // Configuration
   const PADDING_X = 80; // Horizontal padding between images
   const PADDING_Y = 80; // Vertical padding between images
@@ -126,7 +127,12 @@ export default function InfiniteGrid({ onImageClick, animationType = 'default' }
     const newVisibleCells = Array.from(visibleCellKeys);
     const cellsToAnimate = newVisibleCells.filter(cellKey => !currentTimeouts.has(cellKey));
     
-    if (animationType === 'polkadot') {
+    if (animationType === 'disabled') {
+      // No animation - all cells appear immediately
+      cellsToAnimate.forEach((cellKey) => {
+        setAnimatedCells(prev => new Set(prev).add(cellKey));
+      });
+    } else if (animationType === 'polkadot') {
       // Create polka dot/whack-a-mole effect by randomizing the order
       // but ensuring cells animate in clusters rather than pure random
       
@@ -215,7 +221,7 @@ export default function InfiniteGrid({ onImageClick, animationType = 'default' }
   // Custom smooth diagonal scrolling
   React.useEffect(() => {
     const container = parentRef.current;
-    if (!container) return;
+    if (!container || disableCustomScroll) return;
     
     // Custom diagonal wheel handling with smooth interpolation
     let targetScrollX = container.scrollLeft;
@@ -275,7 +281,7 @@ export default function InfiniteGrid({ onImageClick, animationType = 'default' }
     return () => {
       container.removeEventListener('wheel', handleWheel);
     };
-  }, []);
+  }, [disableCustomScroll]);
   
   
   
@@ -332,9 +338,11 @@ export default function InfiniteGrid({ onImageClick, animationType = 'default' }
                       filter: isAnimated ? 'blur(0px)' : 'blur(8px)',
                       
                       // Animation type specific transition
-                      transition: animationType === 'polkadot' 
-                        ? 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)' // Bouncy whack-a-mole
-                        : 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1)', // Smooth default
+                      transition: animationType === 'disabled' 
+                        ? 'none' // No transition for disabled
+                        : animationType === 'polkadot' 
+                          ? 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)' // Bouncy whack-a-mole
+                          : 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1)', // Smooth default
                     }}
                     onClick={() => {
                       if (onImageClick && isAnimated) {
