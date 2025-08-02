@@ -41,7 +41,7 @@ export default function InfiniteGrid({ onImageClick, animationType = 'default', 
   
   // Track which cells are currently animated
   const [animatedCells, setAnimatedCells] = React.useState(new Set<string>());
-  const timeoutsRef = React.useRef(new Map<string, number>());
+  const timeoutsRef = React.useRef(new Map<string, ReturnType<typeof setTimeout>>());
   
   const parentRef = React.useRef<HTMLDivElement>(null);
   

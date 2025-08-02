@@ -13,6 +13,7 @@
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-virtual": "^3.13.12",
     "@types/hammerjs": "^2.0.46",
+    "@vercel/analytics": "^1.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "hammerjs": "^2.0.8",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
+    "@types/node": "^24.1.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",

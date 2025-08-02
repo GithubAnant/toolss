@@ -1,6 +1,7 @@
 import  InfiniteGrid  from './InfiniteGrid'
 import { RippleButton } from './components/magicui/ripple-button';
 import { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 
 interface SelectedImage {
   url: string;
@@ -231,6 +232,7 @@ function App() {
           `}</style>
         </div>
       )}
+      <Analytics />
     </div>
   );
 }
