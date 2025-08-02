@@ -12,13 +12,23 @@ interface SelectedImage {
 // This is just to help me keep track what div does what without having to create a react arrow function
 function App() {
   const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null);
+  const [isExiting, setIsExiting] = useState(false);
 
   const handleImageClick = (imageData: SelectedImage) => {
     setSelectedImage(imageData);
+    setIsExiting(false);
   };
 
   const handleCloseModal = () => {
-    setSelectedImage(null);
+    setIsExiting(true);
+  };
+
+  const handleAnimationEnd = (e: React.AnimationEvent) => {
+    // Only handle the backdrop animation ending
+    if (isExiting && e.animationName === 'backdropFadeOut') {
+      setSelectedImage(null);
+      setIsExiting(false);
+    }
   };
 
   return (
@@ -50,8 +60,20 @@ function App() {
       <InfiniteGrid onImageClick={handleImageClick} />
       
       {selectedImage && (
-        <div className="fixed   inset-0 flex flex-col overflow-y-auto p-4 items-center bg-white/50 backdrop-blur-sm z-50">
-          <div className="absolute bottom-12  z-10 flex gap-2 ">
+        <div 
+          className="fixed inset-0 flex flex-col overflow-y-auto p-4 items-center bg-white/50 backdrop-blur-sm z-50 transition-all duration-500 ease-out"
+          style={{
+            animation: isExiting ? 'backdropFadeOut 0.7s ease-out forwards' : 'backdropFadeIn 0.5s ease-out forwards'
+          }}
+          onClick={handleCloseModal}
+          onAnimationEnd={handleAnimationEnd}
+        >
+          <div 
+            className="absolute bottom-12 z-10 flex gap-2 transition-all duration-700 ease-out"
+            style={{
+              animation: isExiting ? 'slideDownFade 0.4s ease-out forwards' : 'slideUpFade 0.7s ease-out 0.4s both'
+            }}
+          >
             <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground h-9 w-9 rounded-full p-2 transition-colors bg-black/10 text-black/80 hover:bg-black/20" aria-label="Play audio">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
@@ -65,7 +87,10 @@ function App() {
             <button 
               className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground h-9 w-9 rounded-full p-2 transition-colors bg-black/10 text-black/80 hover:bg-black/20" 
               aria-label="Close"
-              onClick={handleCloseModal}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCloseModal();
+              }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -73,7 +98,13 @@ function App() {
             </button>
           </div>
           
-          <div className="relative mb-6 min-h-[200px] w-full ">
+          <div 
+            className="relative mb-6 min-h-[200px] w-full transition-all duration-600 ease-out"
+            style={{
+              animation: isExiting ? 'scaleBlurFadeOut 0.4s ease-out forwards' : 'scaleBlurFade 0.6s ease-out 0.1s both'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <img 
               src={selectedImage.url} 
               alt={`Image ${selectedImage.row}-${selectedImage.col}`}
@@ -82,32 +113,122 @@ function App() {
             />
           </div>
           
-          <div className="flex w-[300px]  flex-col justify-center p-4 text-black ">
+          <div 
+            className="flex w-[300px] flex-col justify-center p-4 text-black transition-all duration-700 ease-out"
+            style={{
+              animation: isExiting ? 'slideDownFade 0.4s ease-out forwards' : 'slideUpFade 0.7s ease-out 0.2s both'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="mb-4 flex flex-wrap gap-2">
               <span className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-normal border-black/30 bg-black/10 text-black/80 cursor-pointer">photography</span>
               <span className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-normal border-black/30 bg-black/10 text-black/80 cursor-pointer">nature</span>
               <span className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-normal border-black/30 bg-black/10 text-black/80 cursor-pointer">landscape</span>
             </div>
             
-            <h2 className="mb-2 text-3xl font-bold ">Beautiful Image</h2>
-            <div className="mb-4 text-lg text-black/90 "></div>
-            <p className="text-base text-black/80 ">
+            <h2 className="mb-2 text-3xl font-bold">Beautiful Image</h2>
+            <div className="mb-4 text-lg text-black/90"></div>
+            <p className="text-base text-black/80">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
             </p>
             
-            <div className="flex w-full gap-4 py-5 items-center justify-center ">
+            <div 
+              className="flex w-full gap-4 py-5 items-center justify-center transition-all duration-700 ease-out"
+              style={{
+                animation: isExiting ? 'slideDownFade 0.3s ease-out forwards' : 'slideUpFade 0.7s ease-out 0.3s both'
+              }}
+            >
               <RippleButton 
                 className="bg-black w-[120px] rounded-full text-white border-none"
-                onClick={handleCloseModal}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCloseModal();
+                }}
               >
-                <span className="">Back</span>
+                <span>Back</span>
               </RippleButton>
               
               <RippleButton className="bg-black w-[120px] rounded-full text-white border-none">
-                <span className="">Download</span>
+                <span>Download</span>
               </RippleButton>
             </div>
           </div>
+          
+          <style>{`
+            @keyframes backdropFadeIn {
+              from {
+                opacity: 0;
+                backdrop-filter: blur(0px);
+              }
+              to {
+                opacity: 1;
+                backdrop-filter: blur(8px);
+              }
+            }
+            
+            @keyframes backdropFadeOut {
+              0% {
+                opacity: 1;
+                backdrop-filter: blur(8px);
+              }
+              100% {
+                opacity: 0;
+                backdrop-filter: blur(0px);
+              }
+            }
+            
+            @keyframes scaleBlurFade {
+              from {
+                opacity: 0;
+                transform: scale(0.9) translateY(30px);
+                filter: blur(6px);
+              }
+              to {
+                opacity: 1;
+                transform: scale(1) translateY(0px);
+                filter: blur(0px);
+              }
+            }
+            
+            @keyframes scaleBlurFadeOut {
+              from {
+                opacity: 1;
+                transform: scale(1) translateY(0px);
+                filter: blur(0px);
+              }
+              to {
+                opacity: 0;
+                transform: scale(0.9) translateY(30px);
+                filter: blur(6px);
+              }
+            }
+            
+            @keyframes slideUpFade {
+              from {
+                opacity: 0;
+                transform: translateY(40px);
+                filter: blur(4px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0px);
+                filter: blur(0px);
+              }
+            }
+            
+            @keyframes slideDownFade {
+              from {
+                opacity: 1;
+                transform: translateY(0px);
+                filter: blur(0px);
+              }
+              to {
+                opacity: 0;
+                transform: translateY(30px);
+                filter: blur(4px);
+              }
+            }
+          `}</style>
         </div>
       )}
     </div>
