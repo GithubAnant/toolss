@@ -61,43 +61,14 @@ function App() {
       
       {selectedImage && (
         <div 
-          className={`modal-backdrop fixed pt-12 inset-0 flex flex-col overflow-y-auto p-4 items-center bg-white/50 backdrop-blur-sm z-50 transition-all duration-500 ease-out ${isExiting ? 'modal-exiting' : ''}`}
+          className={`modal-backdrop fixed pt-12 inset-0 flex flex-col overflow-y-auto p-4 items-center z-50 bg-white ${isExiting ? 'modal-exiting' : ''}`}
           style={{
             pointerEvents: isExiting ? 'none' : 'auto'
           }}
           onClick={handleCloseModal}
           onAnimationEnd={handleAnimationEnd}
         >
-          <div 
-            className={`modal-buttons absolute bottom-12 z-10 flex gap-2 transition-all duration-700 ease-out ${isExiting ? 'modal-buttons-exit' : ''}`}
-            style={{
-              pointerEvents: isExiting ? 'none' : 'auto'
-            }}
-          >
-            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground h-9 w-9 rounded-full p-2 transition-colors bg-black/10 text-black/80 hover:bg-black/20" aria-label="Play audio">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-              </svg>
-            </button>
-            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground h-9 w-9 rounded-full p-2 transition-colors bg-black/10 text-black/80 hover:bg-black/20" aria-label="Share">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-              </svg>
-            </button>
-            <button 
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground h-9 w-9 rounded-full p-2 transition-colors bg-black/10 text-black/80 hover:bg-black/20" 
-              aria-label="Close"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCloseModal();
-              }}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          
+          {/* The Image in the expanded view */}
           <div 
             className={`modal-image relative mb-6 min-h-[200px] w-full transition-all duration-600 ease-out ${isExiting ? 'modal-image-exit' : ''}`}
             onClick={(e) => e.stopPropagation()}
@@ -113,6 +84,7 @@ function App() {
             />
           </div>
           
+          {/* The lorem ipsum section / description of the image  */}
           <div 
             className={`modal-content flex w-[300px] flex-col justify-center p-4 text-black transition-all duration-700 ease-out ${isExiting ? 'modal-content-exit' : ''}`}
             onClick={(e) => e.stopPropagation()}
@@ -132,6 +104,7 @@ function App() {
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
             </p>
             
+            {/* The download and go back button */}
             <div 
               className={`modal-actions flex w-full gap-4 py-5 items-center justify-center transition-all duration-700 ease-out ${isExiting ? 'modal-actions-exit' : ''}`}
               style={{
@@ -198,22 +171,18 @@ function App() {
             @keyframes backdropFadeIn {
               from {
                 opacity: 0;
-                backdrop-filter: blur(0px);
               }
               to {
                 opacity: 1;
-                backdrop-filter: blur(8px);
               }
             }
             
             @keyframes backdropFadeOut {
               0% {
                 opacity: 1;
-                backdrop-filter: blur(8px);
               }
               100% {
                 opacity: 0;
-                backdrop-filter: blur(0px);
               }
             }
             
