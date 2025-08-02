@@ -25,7 +25,6 @@ function App() {
   };
 
   const handleAnimationEnd = (e: React.AnimationEvent) => {
-    // Only handle the backdrop animation ending
     if (isExiting && e.animationName === 'backdropFadeOut') {
       setSelectedImage(null);
       setIsExiting(false);
@@ -62,17 +61,17 @@ function App() {
       
       {selectedImage && (
         <div 
-          className="fixed pt-12 inset-0 flex flex-col overflow-y-auto p-4 items-center bg-white/50 backdrop-blur-sm z-50 transition-all duration-500 ease-out"
+          className={`modal-backdrop fixed pt-12 inset-0 flex flex-col overflow-y-auto p-4 items-center bg-white/50 backdrop-blur-sm z-50 transition-all duration-500 ease-out ${isExiting ? 'modal-exiting' : ''}`}
           style={{
-            animation: isExiting ? 'backdropFadeOut 0.7s ease-out forwards' : 'backdropFadeIn 0.5s ease-out forwards'
+            pointerEvents: isExiting ? 'none' : 'auto'
           }}
           onClick={handleCloseModal}
           onAnimationEnd={handleAnimationEnd}
         >
           <div 
-            className="absolute bottom-12 z-10 flex gap-2 transition-all duration-700 ease-out"
+            className={`modal-buttons absolute bottom-12 z-10 flex gap-2 transition-all duration-700 ease-out ${isExiting ? 'modal-buttons-exit' : ''}`}
             style={{
-              animation: isExiting ? 'slideDownFade 0.4s ease-out forwards' : 'slideUpFade 0.7s ease-out 0.4s both'
+              pointerEvents: isExiting ? 'none' : 'auto'
             }}
           >
             <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground h-9 w-9 rounded-full p-2 transition-colors bg-black/10 text-black/80 hover:bg-black/20" aria-label="Play audio">
@@ -100,11 +99,11 @@ function App() {
           </div>
           
           <div 
-            className="relative mb-6 min-h-[200px] w-full transition-all duration-600 ease-out"
-            style={{
-              animation: isExiting ? 'scaleBlurFadeOut 0.4s ease-out forwards' : 'scaleBlurFade 0.6s ease-out 0.1s both'
-            }}
+            className={`modal-image relative mb-6 min-h-[200px] w-full transition-all duration-600 ease-out ${isExiting ? 'modal-image-exit' : ''}`}
             onClick={(e) => e.stopPropagation()}
+            style={{
+              pointerEvents: isExiting ? 'none' : 'auto'
+            }}
           >
             <img 
               src={selectedImage.url} 
@@ -115,11 +114,11 @@ function App() {
           </div>
           
           <div 
-            className="flex w-[300px] flex-col justify-center p-4 text-black transition-all duration-700 ease-out"
-            style={{
-              animation: isExiting ? 'slideDownFade 0.4s ease-out forwards' : 'slideUpFade 0.7s ease-out 0.2s both'
-            }}
+            className={`modal-content flex w-[300px] flex-col justify-center p-4 text-black transition-all duration-700 ease-out ${isExiting ? 'modal-content-exit' : ''}`}
             onClick={(e) => e.stopPropagation()}
+            style={{
+              pointerEvents: isExiting ? 'none' : 'auto'
+            }}
           >
             <div className="mb-4 flex flex-wrap gap-2">
               <span className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-normal border-black/30 bg-black/10 text-black/80 cursor-pointer">photography</span>
@@ -134,9 +133,9 @@ function App() {
             </p>
             
             <div 
-              className="flex w-full gap-4 py-5 items-center justify-center transition-all duration-700 ease-out"
+              className={`modal-actions flex w-full gap-4 py-5 items-center justify-center transition-all duration-700 ease-out ${isExiting ? 'modal-actions-exit' : ''}`}
               style={{
-                animation: isExiting ? 'slideDownFade 0.3s ease-out forwards' : 'slideUpFade 0.7s ease-out 0.3s both'
+                pointerEvents: isExiting ? 'none' : 'auto'
               }}
             >
               <RippleButton 
@@ -156,6 +155,46 @@ function App() {
           </div>
           
           <style>{`
+            .modal-backdrop {
+              animation: backdropFadeIn 0.5s ease-out forwards;
+            }
+            
+            .modal-backdrop.modal-exiting {
+              animation: backdropFadeOut 0.7s ease-out forwards;
+            }
+            
+            .modal-buttons {
+              animation: slideUpFade 0.7s ease-out 0.4s both;
+            }
+            
+            .modal-buttons.modal-buttons-exit {
+              animation: slideDownFade 0.4s ease-out forwards;
+            }
+            
+            .modal-image {
+              animation: scaleBlurFade 0.6s ease-out 0.1s both;
+            }
+            
+            .modal-image.modal-image-exit {
+              animation: scaleBlurFadeOut 0.4s ease-out forwards;
+            }
+            
+            .modal-content {
+              animation: slideUpFade 0.7s ease-out 0.2s both;
+            }
+            
+            .modal-content.modal-content-exit {
+              animation: slideDownFade 0.4s ease-out forwards;
+            }
+            
+            .modal-actions {
+              animation: slideUpFade 0.7s ease-out 0.3s both;
+            }
+            
+            .modal-actions.modal-actions-exit {
+              animation: slideDownFade 0.3s ease-out forwards;
+            }
+            
             @keyframes backdropFadeIn {
               from {
                 opacity: 0;
