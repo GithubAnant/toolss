@@ -62,7 +62,7 @@ function App() {
       
       {selectedImage && (
         <div 
-          className="fixed inset-0 flex flex-col overflow-y-auto p-4 items-center bg-white/50 backdrop-blur-sm z-50 transition-all duration-500 ease-out"
+          className="fixed pt-12 inset-0 flex flex-col overflow-y-auto p-4 items-center bg-white/50 backdrop-blur-sm z-50 transition-all duration-500 ease-out"
           style={{
             animation: isExiting ? 'backdropFadeOut 0.7s ease-out forwards' : 'backdropFadeIn 0.5s ease-out forwards'
           }}
