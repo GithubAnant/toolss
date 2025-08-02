@@ -57,7 +57,7 @@ function App() {
         
         
       </div>
-      <InfiniteGrid onImageClick={handleImageClick} />
+      <InfiniteGrid onImageClick={handleImageClick} animationType="polkadot" />
       
       {selectedImage && (
         <div 

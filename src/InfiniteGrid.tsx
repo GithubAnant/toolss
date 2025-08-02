@@ -27,9 +27,10 @@ interface SelectedImage {
 
 interface InfiniteGridProps {
   onImageClick?: (imageData: SelectedImage) => void;
+  animationType?: 'default' | 'polkadot';
 }
 
-export default function InfiniteGrid({ onImageClick }: InfiniteGridProps) {  
+export default function InfiniteGrid({ onImageClick, animationType = 'default' }: InfiniteGridProps) {  
   // Configuration
   const PADDING_X = 80; // Horizontal padding between images
   const PADDING_Y = 80; // Vertical padding between images
@@ -122,18 +123,56 @@ export default function InfiniteGrid({ onImageClick }: InfiniteGridProps) {
       }
     });
     
-    // Set up staggered animation for new visible cells
     const newVisibleCells = Array.from(visibleCellKeys);
-    newVisibleCells.forEach((cellKey, index) => {
-      if (!currentTimeouts.has(cellKey)) {
+    const cellsToAnimate = newVisibleCells.filter(cellKey => !currentTimeouts.has(cellKey));
+    
+    if (animationType === 'polkadot') {
+      // Create polka dot/whack-a-mole effect by randomizing the order
+      // but ensuring cells animate in clusters rather than pure random
+      
+      // Group cells by distance from center of visible area to create wave-like pattern
+      const centerRow = (virtualRows[0]?.index || 0) + Math.floor(virtualRows.length / 2);
+      const centerCol = (virtualColumns[0]?.index || 0) + Math.floor(virtualColumns.length / 2);
+      
+      // Sort by distance from center with some randomness
+      cellsToAnimate.sort((a, b) => {
+        const [aRow, aCol] = a.split('-').map(Number);
+        const [bRow, bCol] = b.split('-').map(Number);
+        
+        // Calculate manhattan distance from center
+        const aDist = Math.abs(aRow - centerRow) + Math.abs(aCol - centerCol);
+        const bDist = Math.abs(bRow - centerRow) + Math.abs(bCol - centerCol);
+        
+        // Add randomness to create polka dot effect
+        const aRandom = (aRow * 13 + aCol * 17) % 7;
+        const bRandom = (bRow * 13 + bCol * 17) % 7;
+        
+        return (aDist + aRandom) - (bDist + bRandom);
+      });
+      
+      cellsToAnimate.forEach((cellKey, index) => {
+        // Use shorter delays for snappier whack-a-mole effect
+        const baseDelay = 30;
+        const randomOffset = Math.random() * 15;
+        const delay = index * baseDelay + randomOffset;
+        
+        const timeout = setTimeout(() => {
+          setAnimatedCells(prev => new Set(prev).add(cellKey));
+          currentTimeouts.delete(cellKey);
+        }, delay);
+        currentTimeouts.set(cellKey, timeout);
+      });
+    } else {
+      // Default animation: simple sequential stagger
+      cellsToAnimate.forEach((cellKey, index) => {
         const delay = index * 20;
         const timeout = setTimeout(() => {
           setAnimatedCells(prev => new Set(prev).add(cellKey));
           currentTimeouts.delete(cellKey);
         }, delay);
         currentTimeouts.set(cellKey, timeout);
-      }
-    });
+      });
+    }
     
     // Clean up animated cells that are no longer visible
     setAnimatedCells(prev => {
@@ -145,7 +184,7 @@ export default function InfiniteGrid({ onImageClick }: InfiniteGridProps) {
       });
       return newAnimated;
     });
-  }, [visibleCellKeys]);
+  }, [visibleCellKeys, virtualRows, virtualColumns, animationType]);
 
   // Infinite scrolling logic
   React.useEffect(() => {
@@ -251,8 +290,8 @@ export default function InfiniteGrid({ onImageClick }: InfiniteGridProps) {
           WebkitOverflowScrolling: 'touch',
           overscrollBehavior: 'contain',
           touchAction: 'pan-x pan-y', // Enable native diagonal touch scrolling
-          border: '2px solid #fff',
-          borderRadius: '12px',
+          // border: '2px solid #fff',
+          // borderRadius: '12px',
           backgroundColor: '#fff',
           boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
           position: 'relative'
@@ -292,8 +331,10 @@ export default function InfiniteGrid({ onImageClick }: InfiniteGridProps) {
                       opacity: isAnimated ? 1 : 0,
                       filter: isAnimated ? 'blur(0px)' : 'blur(8px)',
                       
-                      // Smooth transition when cell becomes animated
-                      transition: 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1)',
+                      // Animation type specific transition
+                      transition: animationType === 'polkadot' 
+                        ? 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)' // Bouncy whack-a-mole
+                        : 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1)', // Smooth default
                     }}
                     onClick={() => {
                       if (onImageClick && isAnimated) {
