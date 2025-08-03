@@ -1,0 +1,221 @@
+.BottomSheet-view {
+  /* SELF-LAYOUT */
+  z-index: 100;
+  /* Adding 60px to make it fully visible below iOS Safari's bottom UI */
+  height: calc(var(--silk-100-lvh-dvh-pct) + 60px);
+}
+
+.BottomSheet-content {
+  /* SELF-LAYOUT */
+  box-sizing: border-box;
+  height: auto;
+  min-height: 100px;
+  /* Center content for our 300px mobile layout */
+  max-width: 530px;
+  margin: 0 auto;
+}
+
+.BottomSheet-bleedingBackground {
+  /* APPEARANCE */
+  border-radius: 24px;
+  background-color: white;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.BottomSheet-handle {
+  /* SELF-LAYOUT */
+  width: 50px;
+  height: 6px;
+
+  /* APPEARANCE */
+  border: 0;
+  border-radius: 9999px;
+  background-color: rgb(209, 213, 219);
+
+  /* INTERACTIVITY */
+  cursor: pointer;
+}
+
+/* Learn More Sheet Styles */
+.LearnMore-content {
+  padding: 0 1.5rem;
+  padding-bottom: max(calc(env(safe-area-inset-bottom, 0px) + 12px), 1.5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.LearnMore-handle {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.LearnMore-icon {
+  color: rgb(31, 41, 55);
+  margin-top: 1rem;
+}
+
+.LearnMore-information {
+  text-align: center;
+}
+
+.LearnMore-title {
+  margin: 0;
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: rgb(31, 41, 55);
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+.LearnMore-description {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: rgb(107, 114, 128);
+  line-height: 1.375;
+}
+
+.LearnMore-features {
+  width: 100%;
+  max-width: 250px;
+}
+
+.LearnMore-features-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: rgb(31, 41, 55);
+  margin-bottom: 0.75rem;
+}
+
+.LearnMore-features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.LearnMore-features-list li {
+  font-size: 1rem;
+  color: rgb(75, 85, 99);
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.LearnMore-features-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0.5rem;
+  color: rgb(31, 41, 55);
+}
+
+.LearnMore-closeButton {
+  width: 100%;
+  max-width: 250px;
+  height: 3rem;
+  border-radius: 9999px;
+  appearance: none;
+  border: none;
+  background-color: rgb(31, 41, 55);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+/* Donate Sheet Styles */
+.Donate-content {
+  padding: 0 1.5rem;
+  padding-bottom: max(calc(env(safe-area-inset-bottom, 0px) + 12px), 1.5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.Donate-handle {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.Donate-icon {
+  color: rgb(239, 68, 68);
+  margin-top: 1rem;
+}
+
+.Donate-information {
+  text-align: center;
+}
+
+.Donate-title {
+  margin: 0;
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: rgb(31, 41, 55);
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+.Donate-description {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: rgb(107, 114, 128);
+  line-height: 1.375;
+}
+
+.Donate-options {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 280px;
+}
+
+.Donate-option-button {
+  flex: 1;
+  padding: 1rem 0.75rem;
+  border-radius: 16px;
+  border: 2px solid rgb(229, 231, 235);
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.Donate-option-button:hover {
+  border-color: rgb(31, 41, 55);
+  background-color: rgb(249, 250, 251);
+}
+
+.Donate-option-amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: rgb(31, 41, 55);
+}
+
+.Donate-option-label {
+  font-size: 0.875rem;
+  color: rgb(107, 114, 128);
+}
+
+.Donate-closeButton {
+  width: 100%;
+  max-width: 250px;
+  height: 3rem;
+  border-radius: 9999px;
+  appearance: none;
+  border: none;
+  background-color: rgb(229, 231, 235);
+  color: rgb(31, 41, 55);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}

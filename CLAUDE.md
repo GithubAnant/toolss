@@ -3,6 +3,8 @@ Rules:
 - Try to avoid using useEffect and useState for managing state of application / loading stuff. Try cleaner alternatives that are easier to debug.
 - Avoid prop drilling at all costs, its better to have more globalized state. For example via Zustand.
 
+Useful to know:
+- our project is meant to be mobile friendly hence why our main overlay of the UI is w-300px, our infinite grid background is different because its ok for that to be full width of the viewport. but UI like buttons, scroll, etc must all fit within the w-300px layout.
 
 Unless explicitly asked for:
 - Do not run pnpm build 

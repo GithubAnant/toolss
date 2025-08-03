@@ -2,6 +2,9 @@ import  InfiniteGrid  from './InfiniteGrid'
 import { RippleButton } from './components/magicui/ripple-button';
 import { useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
+import { BottomSheet } from './components/BottomSheet';
+import './components/BottomSheet.css';
+import { Info, Heart } from 'lucide-react';
 
 interface SelectedImage {
   url: string;
@@ -46,12 +49,79 @@ function App() {
         </div>
         <div className="bottomButtonsContainers  absolute bottom-9 flex flex-row gap-4 justify-center items-center pointer-events-auto">
 
-        <RippleButton className="text-white font-bold lowercase w-[120px] h-[50px] flex line-clamp-1 justify-center items-center bg-black/30 rounded-full p-0! border-none backdrop-blur-lg" rippleColor='#fff'>
-          Learn More
-        </RippleButton>
-        <RippleButton className="text-white font-bold  lowercase w-[120px] h-[50px] flex line-clamp-1 justify-center items-center bg-black/30 rounded-full p-0! border-none backdrop-blur-lg" rippleColor='#fff'>
-          Donate
-        </RippleButton>
+        <BottomSheet.Root>
+          <BottomSheet.Trigger asChild>
+            <RippleButton className="text-white font-bold lowercase w-[120px] h-[50px] flex line-clamp-1 justify-center items-center bg-black/30 rounded-full p-0! border-none backdrop-blur-lg" rippleColor='#fff'>
+              Learn More
+            </RippleButton>
+          </BottomSheet.Trigger>
+          <BottomSheet.Portal>
+            <BottomSheet.View>
+              <BottomSheet.Backdrop />
+              <BottomSheet.Content className="LearnMore-content">
+                <BottomSheet.Handle className="LearnMore-handle" />
+                <div className="LearnMore-icon">
+                  <Info size={80} strokeWidth={2} />
+                </div>
+                <div className="LearnMore-information">
+                  <BottomSheet.Title className="LearnMore-title font-black!">
+                    About iconly
+                  </BottomSheet.Title>
+                  <BottomSheet.Description className="flex flex-row text-pretty text-left text-gray-500 font-semibold w-[300px]">
+                    iconly is an AI-powered icon generator that creates beautiful, unique icons instantly.
+                  </BottomSheet.Description>
+                </div>
+                <BottomSheet.Trigger className="LearnMore-closeButton" action="dismiss">
+                  Close
+                </BottomSheet.Trigger>
+              </BottomSheet.Content>
+            </BottomSheet.View>
+          </BottomSheet.Portal>
+        </BottomSheet.Root>
+        
+        <BottomSheet.Root>
+          <BottomSheet.Trigger asChild>
+            <RippleButton className="text-white font-bold  lowercase w-[120px] h-[50px] flex line-clamp-1 justify-center items-center bg-black/30 rounded-full p-0! border-none backdrop-blur-lg" rippleColor='#fff'>
+              Donate
+            </RippleButton>
+          </BottomSheet.Trigger>
+          <BottomSheet.Portal>
+            <BottomSheet.View>
+              <BottomSheet.Backdrop />
+              <BottomSheet.Content className="Donate-content">
+                <BottomSheet.Handle className="Donate-handle" />
+                <div className="Donate-icon">
+                  <Heart size={80} strokeWidth={2} fill='red'/>
+                </div>
+                <div className="Donate-information">
+                  <BottomSheet.Title className="Donate-title">
+                    Support iconly
+                  </BottomSheet.Title>
+                  <BottomSheet.Description className="flex flex-row text-pretty text-left text-gray-500 font-semibold w-[300px]">
+                    Your support helps us keep iconly free and accessible for everyone. Every contribution goes directly to improving the service and adding new features.
+                  </BottomSheet.Description>
+                </div>
+                <div className="Donate-options">
+                  <button className="Donate-option-button">
+                    <span className="Donate-option-amount">$5</span>
+                    <span className="Donate-option-label">Coffee</span>
+                  </button>
+                  <button className="Donate-option-button">
+                    <span className="Donate-option-amount">$10</span>
+                    <span className="Donate-option-label">Lunch</span>
+                  </button>
+                  <button className="Donate-option-button">
+                    <span className="Donate-option-amount">$25</span>
+                    <span className="Donate-option-label">Dinner</span>
+                  </button>
+                </div>
+                <BottomSheet.Trigger className="Donate-closeButton" action="dismiss">
+                  Maybe Later
+                </BottomSheet.Trigger>
+              </BottomSheet.Content>
+            </BottomSheet.View>
+          </BottomSheet.Portal>
+        </BottomSheet.Root>
 
         </div>
         

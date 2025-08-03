@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@silk-hq/components": "^0.9.11",
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-virtual": "^3.13.12",
     "@types/hammerjs": "^2.0.46",

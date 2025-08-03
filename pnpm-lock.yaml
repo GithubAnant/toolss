@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@silk-hq/components':
+        specifier: ^0.9.11
+        version: 0.9.11(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@tailwindcss/vite':
         specifier: ^4.1.11
         version: 4.1.11(vite@7.0.6(@types/node@24.1.0)(jiti@2.5.1)(lightningcss@1.30.1))
@@ -522,6 +525,12 @@ packages:
     resolution: {integrity: sha512-CvUo2ixeIQGtF6WvuB87XWqPQkoFAFqW+HUo/WzHwuHDvIwZCtjdWXoYCcr06iKGydiqTclC4jU/TNObC/xKZg==}
     cpu: [x64]
     os: [win32]
+
+  '@silk-hq/components@0.9.11':
+    resolution: {integrity: sha512-HnkcGCQ1guH3imv56IGqEadhyR20SabvCKVdmYtNYbaLmgvxhMAxaourobOtPz7cjya0eNkWsSm9Rh1WrRTb7Q==}
+    peerDependencies:
+      react: ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@tailwindcss/node@4.1.11':
     resolution: {integrity: sha512-yzhzuGRmv5QyU9qLNg4GTlYI6STedBWRE7NjxP45CsFYYq9taI0zJXZBMqIC/c8fViNLhmrbpSFS57EoxUmD6Q==}
@@ -1800,6 +1809,11 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.46.2':
     optional: true
+
+  '@silk-hq/components@0.9.11(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
+    dependencies:
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
 
   '@tailwindcss/node@4.1.11':
     dependencies:
