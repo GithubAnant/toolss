@@ -1,10 +1,10 @@
 import  InfiniteGrid  from './InfiniteGrid'
 import { RippleButton } from './components/magicui/ripple-button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { BottomSheet } from './components/BottomSheet';
 import './components/BottomSheet.css';
-import { Info, Heart } from 'lucide-react';
+import { Info } from 'lucide-react';
 
 interface SelectedImage {
   url: string;
@@ -17,6 +17,36 @@ interface SelectedImage {
 function App() {
   const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null);
   const [isExiting, setIsExiting] = useState(false);
+  const [starCount, setStarCount] = useState<number | null>(null);
+
+  // GitHub icon component
+  const GitHubIcon = ({ size = 20, className = "" }: { size?: number; className?: string }) => (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+    >
+      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+    </svg>
+  );
+
+  // Fetch GitHub stars
+  useEffect(() => {
+    const fetchStars = async () => {
+      try {
+        const response = await fetch('https://api.github.com/repos/GithubAnant/toolss');
+        const data = await response.json();
+        setStarCount(data.stargazers_count);
+      } catch (error) {
+        console.error('Failed to fetch star count:', error);
+        setStarCount(0);
+      }
+    };
+
+    fetchStars();
+  }, []);
 
   const handleImageClick = (imageData: SelectedImage) => {
     setSelectedImage(imageData);
@@ -38,7 +68,7 @@ function App() {
     <div className="relative w-dvw h-dvh flex justify-center items-center flex-col">
       <div className=" absolute flex flex-col pointer-events-none justify-center items-center w-[300px] bg-transparent h-full z-10">
         <div className="topTextContainer absolute top-10 bg-black/50 rounded-full p-3 text-white  font-black text-3xl">
-          iconly
+          toolss
         </div>
         <div className="searchContainer absolute top-20 mt-16 pointer-events-auto">
           <input 
@@ -65,10 +95,10 @@ function App() {
                 </div>
                 <div className="LearnMore-information">
                   <BottomSheet.Title className="LearnMore-title font-black!">
-                    About iconly
+                    About Toolss
                   </BottomSheet.Title>
                   <BottomSheet.Description className="flex flex-row text-pretty text-left text-gray-500 font-semibold w-[300px]">
-                    iconly is an AI-powered icon generator that creates beautiful, unique icons instantly.
+                    Toolss is an AI-powered icon generator that creates beautiful, unique icons instantly.
                   </BottomSheet.Description>
                 </div>
                 <BottomSheet.Trigger className="LearnMore-closeButton" action="dismiss">
@@ -81,41 +111,38 @@ function App() {
         
         <BottomSheet.Root>
           <BottomSheet.Trigger asChild>
-            <RippleButton className="text-white font-bold  lowercase w-[120px] h-[50px] flex line-clamp-1 justify-center items-center bg-black/30 rounded-full p-0! border-none backdrop-blur-lg" rippleColor='#fff'>
-              Donate
+            <RippleButton className="text-white font-bold lowercase w-[120px] h-[50px] flex line-clamp-1 justify-center items-center bg-black/30 rounded-full p-0! border-none backdrop-blur-lg" rippleColor='#fff'>
+              Support
             </RippleButton>
           </BottomSheet.Trigger>
           <BottomSheet.Portal>
             <BottomSheet.View>
               <BottomSheet.Backdrop />
-              <BottomSheet.Content className="Donate-content">
-                <BottomSheet.Handle className="Donate-handle" />
-                <div className="Donate-icon">
-                  <Heart size={80} strokeWidth={2} fill='red'/>
+              <BottomSheet.Content className="Support-content">
+                <BottomSheet.Handle className="Support-handle" />
+                <div className="Support-icon">
+                  <GitHubIcon size={80} className="text-gray-900"/>
                 </div>
-                <div className="Donate-information">
-                  <BottomSheet.Title className="Donate-title">
-                    Support iconly
+                <div className="Support-information">
+                  <BottomSheet.Title className="Support-title">
+                    Star Our Repository
                   </BottomSheet.Title>
                   <BottomSheet.Description className="flex flex-row text-pretty text-left text-gray-500 font-semibold w-[300px]">
-                    Your support helps us keep iconly free and accessible for everyone. Every contribution goes directly to improving the service and adding new features.
+                    Help us grow by starring our GitHub repository! Your star helps other developers discover toolss and motivates us to keep improving.
                   </BottomSheet.Description>
                 </div>
-                <div className="Donate-options">
-                  <button className="Donate-option-button">
-                    <span className="Donate-option-amount">$5</span>
-                    <span className="Donate-option-label">Coffee</span>
-                  </button>
-                  <button className="Donate-option-button">
-                    <span className="Donate-option-amount">$10</span>
-                    <span className="Donate-option-label">Lunch</span>
-                  </button>
-                  <button className="Donate-option-button">
-                    <span className="Donate-option-amount">$25</span>
-                    <span className="Donate-option-label">Dinner</span>
+                <div className="Support-actions">
+                  <button 
+                    onClick={() => window.open('https://github.com/GithubAnant/toolss', '_blank')}
+                    className="Support-star-button bg-gray-900 hover:bg-gray-800 text-white font-semibold py-4 px-8 rounded-xl flex items-center gap-3 transition-all duration-200 transform hover:scale-105"
+                  >
+                    <GitHubIcon size={16}/>
+                    <span>
+                      {starCount !== null ? `${starCount} Stars` : 'Star on GitHub'}
+                    </span>
                   </button>
                 </div>
-                <BottomSheet.Trigger className="Donate-closeButton" action="dismiss">
+                <BottomSheet.Trigger className="Support-closeButton" action="dismiss">
                   Maybe Later
                 </BottomSheet.Trigger>
               </BottomSheet.Content>

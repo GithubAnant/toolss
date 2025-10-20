@@ -127,8 +127,8 @@
   margin-top: 1rem;
 }
 
-/* Donate Sheet Styles */
-.Donate-content {
+/* Support Sheet Styles */
+.Support-content {
   padding: 0 1.5rem;
   padding-bottom: max(calc(env(safe-area-inset-bottom, 0px) + 12px), 1.5rem);
   display: flex;
@@ -137,21 +137,21 @@
   gap: 1.5rem;
 }
 
-.Donate-handle {
+.Support-handle {
   margin-top: 0.5rem;
   margin-bottom: 1rem;
 }
 
-.Donate-icon {
-  color: rgb(239, 68, 68);
+.Support-icon {
+  color: rgb(31, 41, 55);
   margin-top: 1rem;
 }
 
-.Donate-information {
+.Support-information {
   text-align: center;
 }
 
-.Donate-title {
+.Support-title {
   margin: 0;
   font-size: 1.875rem;
   font-weight: 800;
@@ -160,52 +160,23 @@
   margin-bottom: 1rem;
 }
 
-.Donate-description {
-  margin: 0;
-  font-size: 1.125rem;
-  font-weight: 500;
-  color: rgb(107, 114, 128);
-  line-height: 1.375;
-}
-
-.Donate-options {
+.Support-actions {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
   max-width: 280px;
 }
 
-.Donate-option-button {
-  flex: 1;
-  padding: 1rem 0.75rem;
-  border-radius: 16px;
-  border: 2px solid rgb(229, 231, 235);
-  background-color: white;
+.Support-star-button {
+  appearance: none;
+  border: none;
+  outline: none;
   cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
+  text-decoration: none;
 }
 
-.Donate-option-button:hover {
-  border-color: rgb(31, 41, 55);
-  background-color: rgb(249, 250, 251);
-}
-
-.Donate-option-amount {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: rgb(31, 41, 55);
-}
-
-.Donate-option-label {
-  font-size: 0.875rem;
-  color: rgb(107, 114, 128);
-}
-
-.Donate-closeButton {
+.Support-closeButton {
   width: 100%;
   max-width: 250px;
   height: 3rem;
@@ -217,5 +188,5 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
 }
