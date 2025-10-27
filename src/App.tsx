@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import "./components/BottomSheet.css";
 import type { Tool } from "./lib/supabase";
+import { Databuddy } from '@databuddy/sdk/react';
 
 // Component imports
 import { SearchBar } from "./components/SearchBar";
@@ -64,6 +65,10 @@ function App() {
         onMoreClick={() => setShowMoreModal(true)}
       />
 
+      <Databuddy
+        clientId="rzgzxIRFjLiP5-y4HNrlo"
+        enableBatching={true}
+      />
       {/* More Categories Modal */}
       <MoreCategoriesModal
         isOpen={showMoreModal}
