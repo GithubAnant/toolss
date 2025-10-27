@@ -56,7 +56,7 @@ export default function InfiniteGrid({
   // Supabase data
   const [tools, setTools] = React.useState<Tool[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const [, setError] = React.useState<string | null>(null);
 
   // Fetch tools from Supabase
   React.useEffect(() => {
