@@ -18,11 +18,13 @@
 
 import * as React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { supabase, type Tool } from "./lib/supabase";
 
 interface SelectedImage {
   url: string;
   row: number;
   col: number;
+  tool?: Tool;
 }
 
 interface InfiniteGridProps {
@@ -51,7 +53,37 @@ export default function InfiniteGrid({
 
   const parentRef = React.useRef<HTMLDivElement>(null);
 
-  // Sample image URLs
+  // Supabase data
+  const [tools, setTools] = React.useState<Tool[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  // Fetch tools from Supabase
+  React.useEffect(() => {
+    const fetchTools = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('tools')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        
+        setTools(data || []);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching tools:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch tools');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTools();
+  }, []);
+
+  // Fallback sample images for loading state
   const sampleImages = [
     "https://framerusercontent.com/images/qrhJzoswjJnmdvWqADcTtOrAAA.png",
     "https://framerusercontent.com/images/8VtFSuyoDA1vXYLsfLa4dy6GAY.webp",
@@ -86,10 +118,20 @@ export default function InfiniteGrid({
     "https://framerusercontent.com/images/2BnFYwAUj5YFBAYPXs1wiVnhatw.webp",
   ];
 
-  // Get image for a specific cell
-  const getImageForCell = (row: number, col: number) => {
-    const index = (row * 1000 + col) % sampleImages.length;
-    return sampleImages[index];
+  // Get tool data for a specific cell
+  const getToolForCell = (row: number, col: number): { imageUrl: string; tool?: Tool } => {
+    if (isLoading || tools.length === 0) {
+      // Use fallback images while loading
+      const index = (row * 1000 + col) % sampleImages.length;
+      return { imageUrl: sampleImages[index] };
+    }
+    
+    const index = (row * 1000 + col) % tools.length;
+    const tool = tools[index];
+    return { 
+      imageUrl: tool.image_link,
+      tool: tool
+    };
   };
 
   // Generate fixed sizes for consistent infinite scrolling (including padding)
@@ -336,6 +378,7 @@ export default function InfiniteGrid({
               {virtualColumns.map((virtualColumn) => {
                 const cellKey = `${virtualRow.index}-${virtualColumn.index}`;
                 const isAnimated = animatedCells.has(cellKey);
+                const { imageUrl, tool } = getToolForCell(virtualRow.index, virtualColumn.index);
 
                 return (
                   <div
@@ -367,22 +410,17 @@ export default function InfiniteGrid({
                     onClick={() => {
                       if (onImageClick && isAnimated) {
                         onImageClick({
-                          url: getImageForCell(
-                            virtualRow.index,
-                            virtualColumn.index,
-                          ),
+                          url: imageUrl,
                           row: virtualRow.index,
                           col: virtualColumn.index,
+                          tool: tool,
                         });
                       }
                     }}
                   >
                     <img
-                      src={getImageForCell(
-                        virtualRow.index,
-                        virtualColumn.index,
-                      )}
-                      alt={`Cell ${virtualRow.index}, ${virtualColumn.index}`}
+                      src={imageUrl}
+                      alt={tool?.name || `Cell ${virtualRow.index}, ${virtualColumn.index}`}
                       style={{
                         width: "100%",
                         height: "100%",
