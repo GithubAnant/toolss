@@ -65,6 +65,7 @@ export function AuthMenu({ onClose }: AuthMenuProps) {
             }}
             providers={[]}
             theme="light"
+            redirectTo={window.location.origin}
           />
         </div>
       </div>

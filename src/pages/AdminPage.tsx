@@ -30,6 +30,7 @@ interface AdminEmail {
 export function AdminPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [unauthorized, setUnauthorized] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [tools, setTools] = useState<Tool[]>([]);
   const [suggestions, setSuggestions] = useState<UserSuggestion[]>([]);
@@ -50,7 +51,10 @@ export function AdminPage() {
       } = await supabase.auth.getUser();
 
       if (!user || !(await isAdmin(user.email))) {
-        navigate("/");
+        setUnauthorized(true);
+        setLoading(false);
+        // Redirect after showing message
+        setTimeout(() => navigate("/"), 1500);
         return;
       }
 
@@ -66,9 +70,11 @@ export function AdminPage() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!session || !(await isAdmin(session.user.email))) {
-        navigate("/");
+        setUnauthorized(true);
+        setTimeout(() => navigate("/"), 1500);
       } else {
         setUser(session.user);
+        setUnauthorized(false);
       }
     });
 
@@ -351,6 +357,24 @@ export function AdminPage() {
     return (
       <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
         <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+      </div>
+    );
+  }
+
+  if (unauthorized) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Access Denied
+          </div>
+          <div className="text-gray-600 dark:text-gray-400 mb-4">
+            You don't have permission to access this page.
+          </div>
+          <div className="text-sm text-gray-500 dark:text-gray-500">
+            Redirecting to home...
+          </div>
+        </div>
       </div>
     );
   }
