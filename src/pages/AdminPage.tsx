@@ -71,10 +71,13 @@ export function AdminPage() {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!session || !(await isAdmin(session.user.email))) {
         setUnauthorized(true);
+        setLoading(false);
         setTimeout(() => navigate("/"), 1500);
       } else {
         setUser(session.user);
         setUnauthorized(false);
+        setLoading(false);
+        fetchData();
       }
     });
 

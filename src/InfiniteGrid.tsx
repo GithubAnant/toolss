@@ -31,12 +31,16 @@ interface InfiniteGridProps {
   onImageClick?: (imageData: SelectedImage) => void;
   animationType?: "default" | "polkadot" | "disabled";
   disableCustomScroll?: boolean;
+  selectedCategory?: string;
+  searchQuery?: string;
 }
 
 export default function InfiniteGrid({
   onImageClick,
   animationType = "default",
   disableCustomScroll = false,
+  selectedCategory = "all",
+  searchQuery = "",
 }: InfiniteGridProps) {
   // Configuration
   const PADDING_X = 80; // Horizontal padding between images
@@ -100,6 +104,28 @@ export default function InfiniteGrid({
     fetchTools();
   }, []);
 
+  // Filter tools based on category and search query
+  const filteredTools = React.useMemo(() => {
+    let filtered = tools;
+
+    // Filter by category
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(tool => tool.category === selectedCategory);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(tool => 
+        tool.name.toLowerCase().includes(query) ||
+        tool.description?.toLowerCase().includes(query) ||
+        tool.tags?.some(tag => tag.toLowerCase().includes(query))
+      );
+    }
+
+    return filtered;
+  }, [tools, selectedCategory, searchQuery]);
+
   // Fallback sample images for loading state
   const sampleImages = [
     "https://framerusercontent.com/images/qrhJzoswjJnmdvWqADcTtOrAAA.png",
@@ -137,14 +163,14 @@ export default function InfiniteGrid({
 
   // Get tool data for a specific cell
   const getToolForCell = (row: number, col: number): { imageUrl: string; tool?: Tool } => {
-    if (isLoading || tools.length === 0) {
-      // Use fallback images while loading
+    if (isLoading || filteredTools.length === 0) {
+      // Use fallback images while loading or when no results
       const index = (row * 1000 + col) % sampleImages.length;
       return { imageUrl: sampleImages[index] };
     }
     
-    const index = (row * 1000 + col) % tools.length;
-    const tool = tools[index];
+    const index = (row * 1000 + col) % filteredTools.length;
+    const tool = filteredTools[index];
     return { 
       imageUrl: tool.image_link,
       tool: tool
@@ -295,9 +321,10 @@ export default function InfiniteGrid({
 
   // Cleanup timeouts on unmount
   React.useEffect(() => {
+    const timeouts = timeoutsRef.current;
     return () => {
-      timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
-      timeoutsRef.current.clear();
+      timeouts.forEach((timeout) => clearTimeout(timeout));
+      timeouts.clear();
     };
   }, []);
 
@@ -367,7 +394,21 @@ export default function InfiniteGrid({
   }, [disableCustomScroll]);
 
   return (
-    <div className="  h-dvh w-dvw flex justify-center items-center">
+    <div className="h-dvh w-dvw flex justify-center items-center">
+      {/* No Results Overlay */}
+      {!isLoading && filteredTools.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              No tools found
+            </div>
+            <div className="text-gray-600 dark:text-gray-400">
+              {searchQuery ? `Try a different search term` : `No tools in this category`}
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div
         ref={parentRef}
         className="h-full w-full overflow-auto"

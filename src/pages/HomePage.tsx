@@ -30,6 +30,7 @@ export function HomePage() {
   const [isExiting, setIsExiting] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showMoreModal, setShowMoreModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const starCount = useGitHubStars("GithubAnant/toolss");
 
@@ -53,7 +54,7 @@ export function HomePage() {
     <div className="relative w-dvw h-dvh flex justify-center items-center flex-col bg-white dark:bg-black transition-colors duration-150">
       {/* Header with Nav */}
       <div className="absolute top-6 left-6 right-6 flex items-center gap-4 z-10 pointer-events-auto">
-        <SearchBar />
+        <SearchBar value={searchQuery} onChange={setSearchQuery} />
         <CreateButton />
       </div>
 
@@ -91,6 +92,8 @@ export function HomePage() {
         onImageClick={handleImageClick}
         animationType="polkadot"
         disableCustomScroll={false}
+        selectedCategory={selectedCategory}
+        searchQuery={searchQuery}
       />
 
       {/* Tool Modal */}
