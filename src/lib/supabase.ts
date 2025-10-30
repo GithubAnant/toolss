@@ -7,7 +7,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Admin email whitelist - fallback for when database is not available
 export const ADMIN_EMAILS = [
-  'anantsinghal444@gmail.com', // Fixed typo: .co -> .com
+  'anantsinghal444@gmail.com',
+  'jonpad512@gmail.com' // Fixed typo: .co -> .com
   // Add more admin emails here as fallback
 ];
 
