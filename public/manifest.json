@@ -1,0 +1,46 @@
+{
+  "name": "toolss - Discover the Best AI Tools & Startup Resources",
+  "short_name": "toolss",
+  "description": "Explore a curated collection of the best AI tools, productivity apps, design resources, and startup tools.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAFA",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/image.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "productivity",
+    "business",
+    "tools"
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "AI Tools",
+      "short_name": "AI",
+      "description": "Browse AI and ML tools",
+      "url": "/?category=AI/ML",
+      "icons": [{ "src": "/image.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Productivity",
+      "short_name": "Productivity",
+      "description": "Browse productivity tools",
+      "url": "/?category=Productivity",
+      "icons": [{ "src": "/image.png", "sizes": "96x96" }]
+    }
+  ]
+}

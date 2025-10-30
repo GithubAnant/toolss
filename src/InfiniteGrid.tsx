@@ -44,6 +44,9 @@ export default function InfiniteGrid({
 
   const [rowCount, setRowCount] = React.useState(10);
   const [colCount, setColCount] = React.useState(10);
+  const [isDarkMode, setIsDarkMode] = React.useState(
+    document.documentElement.classList.contains('dark')
+  );
 
   // Track which cells are currently animated
   const [animatedCells, setAnimatedCells] = React.useState(new Set<string>());
@@ -52,6 +55,20 @@ export default function InfiniteGrid({
   );
 
   const parentRef = React.useRef<HTMLDivElement>(null);
+
+  // Listen for dark mode changes
+  React.useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Supabase data
   const [tools, setTools] = React.useState<Tool[]>([]);
@@ -359,11 +376,12 @@ export default function InfiniteGrid({
           WebkitOverflowScrolling: "touch",
           overscrollBehavior: "contain",
           touchAction: "pan-x pan-y", // Enable native diagonal touch scrolling
-          // border: '2px solid #fff',
-          // borderRadius: '12px',
-          backgroundColor: "#fff",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          backgroundColor: isDarkMode ? "#000000" : "#FAFAFA",
+          boxShadow: isDarkMode 
+            ? "0 4px 20px rgba(255,255,255,0.05)" 
+            : "0 4px 20px rgba(0,0,0,0.08)",
           position: "relative",
+          transition: "background-color 0.15s ease, box-shadow 0.15s ease",
         }}
       >
         <div

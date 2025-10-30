@@ -1,108 +1,53 @@
-import InfiniteGrid from "./InfiniteGrid";
-import { useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
+import { Databuddy } from "@databuddy/sdk/react";
+import { useEffect } from "react";
 import "./components/BottomSheet.css";
-import type { Tool } from "./lib/supabase";
-import { Databuddy } from '@databuddy/sdk/react';
 
-// Component imports
-import { SearchBar } from "./components/SearchBar";
-import { CreateButton } from "./components/CreateButton";
-import { CategoryNav } from "./components/CategoryNav";
-import { MoreCategoriesModal } from "./components/MoreCategoriesModal";
-import { LearnMoreSheet } from "./components/LearnMoreSheet";
-import { SupportSheet } from "./components/SupportSheet";
-import { ToolModal } from "./components/ToolModal";
-
-// Hook imports
-import { useGitHubStars } from "./hooks/useGitHubStars";
-
-interface SelectedImage {
-  url: string;
-  row: number;
-  col: number;
-  tool?: Tool;
-}
+// Page imports
+import { HomePage } from "./pages/HomePage";
+import { AdminPage } from "./pages/AdminPage";
+import { SubmitPage } from "./pages/SubmitPage";
 
 function App() {
-  const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
-    null,
-  );
-  const [isExiting, setIsExiting] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [showMoreModal, setShowMoreModal] = useState(false);
-
-  const starCount = useGitHubStars("GithubAnant/toolss");
-
-  const handleImageClick = (imageData: SelectedImage) => {
-    setSelectedImage(imageData);
-    setIsExiting(false);
-  };
-
-  const handleCloseModal = () => {
-    setIsExiting(true);
-  };
-
-  const handleAnimationEnd = (e: React.AnimationEvent) => {
-    if (isExiting && e.animationName === "backdropFadeOut") {
-      setSelectedImage(null);
-      setIsExiting(false);
-    }
-  };
+  useEffect(() => {
+    // Update page title and meta description dynamically
+    document.title = "toolss - Discover the Best AI Tools & Startup Resources";
+    
+    // Add structured data for better SEO
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "toolss",
+      "url": "https://toolss.vercel.app",
+      "description": "Discover the best AI tools, productivity apps, and startup resources",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    });
+    document.head.appendChild(script);
+    
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
 
   return (
-    <div className="relative w-dvw h-dvh flex justify-center items-center flex-col">
-      {/* Top header with search and create button */}
-      <div className="absolute top-6 left-6 right-6 flex items-center gap-4 z-10 pointer-events-auto">
-        <SearchBar />
-        <CreateButton />
-      </div>
-
-      {/* Category navigation in top right */}
-      <CategoryNav
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-        onMoreClick={() => setShowMoreModal(true)}
-      />
-
-      <Databuddy
-        clientId="rzgzxIRFjLiP5-y4HNrlo"
-        enableBatching={true}
-      />
-      {/* More Categories Modal */}
-      <MoreCategoriesModal
-        isOpen={showMoreModal}
-        onClose={() => setShowMoreModal(false)}
-        onSelectCategory={setSelectedCategory}
-      />
-
-      {/* Bottom action buttons */}
-      <div className="absolute flex flex-col pointer-events-none justify-center items-center w-[300px] bg-transparent h-full z-10">
-        <div className="bottomButtonsContainers absolute bottom-6 flex flex-row gap-4 justify-center items-center pointer-events-auto">
-          <LearnMoreSheet />
-          <SupportSheet starCount={starCount} />
-        </div>
-      </div>
-
-      {/* Infinite Grid */}
-      <InfiniteGrid
-        onImageClick={handleImageClick}
-        animationType="polkadot"
-        disableCustomScroll={false}
-      />
-
-      {/* Tool Modal */}
-      {selectedImage && (
-        <ToolModal
-          selectedImage={selectedImage}
-          isExiting={isExiting}
-          onClose={handleCloseModal}
-          onAnimationEnd={handleAnimationEnd}
-        />
-      )}
-
+    <BrowserRouter>
+      <Databuddy clientId="rzgzxIRFjLiP5-y4HNrlo" enableBatching={true} />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/submit" element={<SubmitPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+      </Routes>
       <Analytics />
-    </div>
+    </BrowserRouter>
   );
 }
 

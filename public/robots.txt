@@ -1,0 +1,10 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow admin pages
+User-agent: *
+Disallow: /admin
+
+# Sitemap
+Sitemap: https://toolss.vercel.app/sitemap.xml

@@ -20,12 +20,12 @@ export function CategoryNav({
   onMoreClick,
 }: CategoryNavProps) {
   return (
-    <div className="absolute top-6 right-6 flex items-center gap-2 z-10 pointer-events-auto">
+    <div className="absolute top-6 right-6 flex flex-col md:flex-row items-end md:items-center gap-1.5 md:gap-2 z-10 pointer-events-auto">
       {categories.map((category) => (
         <button
           key={category.name}
           onClick={() => onCategoryChange(category.name)}
-          className={`px-4 py-2 rounded-full text-sm transition-all backdrop-blur-lg ${category.color} text-white ${
+          className={`px-2 py-1 md:px-4 md:py-2 rounded-full text-xs md:text-sm transition-all backdrop-blur-lg ${category.color} text-white ${
             selectedCategory === category.name
               ? "font-bold scale-105 border-1 border-color border-white"
               : "font-medium scale-100"
@@ -38,7 +38,7 @@ export function CategoryNav({
       {/* More button */}
       <button
         onClick={onMoreClick}
-        className="px-4 py-2 rounded-full text-sm font-medium transition-all backdrop-blur-lg bg-slate-500/60 text-white hover:bg-slate-500/80"
+        className="px-2 py-1 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all backdrop-blur-lg bg-slate-500/60 text-white hover:bg-slate-500/80"
       >
         more
       </button>
