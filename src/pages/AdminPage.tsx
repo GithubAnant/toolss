@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase, isAdmin } from "../lib/supabase";
 import type { User } from "@supabase/supabase-js";
@@ -43,8 +43,7 @@ export function AdminPage() {
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const navigate = useNavigate();
 
-  // Fetch data function
-  const fetchData = useCallback(async () => {
+  const fetchData = async () => {
     // Fetch tools
     const { data: toolsData } = await supabase
       .from("tools")
@@ -75,69 +74,38 @@ export function AdminPage() {
     if (adminEmailsData) {
       setAdminEmails(adminEmailsData);
     }
-  }, []);
+  };
 
   useEffect(() => {
-    let mounted = true;
-
     // Check if user is authenticated and is admin
-    const checkAuth = async () => {
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+    const init = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
 
-        if (!mounted) return;
-
-        if (!user || !(await isAdmin(user.email))) {
-          setUnauthorized(true);
-          setLoading(false);
-          // Redirect after showing message
-          setTimeout(() => {
-            if (mounted) navigate("/");
-          }, 1500);
-          return;
-        }
-
-        setUser(user);
-        setLoading(false);
-        await fetchData();
-      } catch (error) {
-        console.error("Auth check error:", error);
-        if (mounted) {
-          setLoading(false);
-          setUnauthorized(true);
-        }
-      }
-    };
-
-    checkAuth();
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!mounted) return;
-
-      if (!session || !(await isAdmin(session.user.email))) {
+      if (!user || !(await isAdmin(user.email))) {
         setUnauthorized(true);
         setLoading(false);
-        setTimeout(() => {
-          if (mounted) navigate("/");
-        }, 1500);
+        setTimeout(() => navigate("/"), 1500);
+        return;
+      }
+
+      setUser(user);
+      setLoading(false);
+      fetchData();
+    };
+
+    init();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!session || !(await isAdmin(session.user.email))) {
+        navigate("/");
       } else {
         setUser(session.user);
-        setUnauthorized(false);
-        setLoading(false);
-        await fetchData();
       }
     });
 
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [navigate, fetchData]);
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const addAdminEmail = async () => {
     if (!newAdminEmail.trim()) {
