@@ -78,23 +78,37 @@ export function AdminPage() {
   }, []);
 
   useEffect(() => {
+    let mounted = true;
+
     // Check if user is authenticated and is admin
     const checkAuth = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-      if (!user || !(await isAdmin(user.email))) {
-        setUnauthorized(true);
+        if (!mounted) return;
+
+        if (!user || !(await isAdmin(user.email))) {
+          setUnauthorized(true);
+          setLoading(false);
+          // Redirect after showing message
+          setTimeout(() => {
+            if (mounted) navigate("/");
+          }, 1500);
+          return;
+        }
+
+        setUser(user);
         setLoading(false);
-        // Redirect after showing message
-        setTimeout(() => navigate("/"), 1500);
-        return;
+        await fetchData();
+      } catch (error) {
+        console.error("Auth check error:", error);
+        if (mounted) {
+          setLoading(false);
+          setUnauthorized(true);
+        }
       }
-
-      setUser(user);
-      setLoading(false);
-      await fetchData();
     };
 
     checkAuth();
@@ -103,10 +117,14 @@ export function AdminPage() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return;
+
       if (!session || !(await isAdmin(session.user.email))) {
         setUnauthorized(true);
         setLoading(false);
-        setTimeout(() => navigate("/"), 1500);
+        setTimeout(() => {
+          if (mounted) navigate("/");
+        }, 1500);
       } else {
         setUser(session.user);
         setUnauthorized(false);
@@ -115,7 +133,10 @@ export function AdminPage() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate, fetchData]);
 
   const addAdminEmail = async () => {
