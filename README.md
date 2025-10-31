@@ -40,7 +40,7 @@ We don't just list tools—we showcase the **best tools** that are actually wort
 
 ## �️ Built with The Best Tech
 
-```
+```2
 Frontend     →  React 18 + TypeScript + Vite
 Styling      →  Tailwind CSS v4 (Latest & Greatest)
 Backend      →  Supabase (PostgreSQL + Auth + Real-time)

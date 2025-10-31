@@ -917,7 +917,7 @@ export function AdminPage() {
                 >
                   <option value="">Select a category</option>
                   <option value="browsers">browsers</option>
-                  <option value="agents">agents</option>
+                  <option value="ai">ai</option>
                   <option value="no code">no code</option>
                   <option value="design">design</option>
                   <option value="coding">coding</option>
@@ -1119,7 +1119,7 @@ export function AdminPage() {
                 >
                   <option value="">Select a category</option>
                   <option value="browsers">browsers</option>
-                  <option value="agents">agents</option>
+                  <option value="ai">ai</option>
                   <option value="no code">no code</option>
                   <option value="design">design</option>
                   <option value="coding">coding</option>

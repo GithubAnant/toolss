@@ -168,7 +168,7 @@ export function SubmitPage() {
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all"
             >
               <option value="browsers">browsers</option>
-              <option value="agents">agents</option>
+              <option value="ai">ai</option>
               <option value="no code">no code</option>
               <option value="design">design</option>
               <option value="coding">coding</option>

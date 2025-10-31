@@ -7,7 +7,7 @@ interface CategoryNavProps {
 const categories = [
   { name: "all", color: "bg-orange-400/60" },
   { name: "browsers", color: "bg-yellow-400/60" },
-  { name: "agents", color: "bg-blue-400/60" },
+  { name: "ai", color: "bg-blue-400/60" },
   { name: "no code", color: "bg-purple-400/60" },
   { name: "design", color: "bg-pink-400/60" },
   { name: "coding", color: "bg-green-400/60" },
