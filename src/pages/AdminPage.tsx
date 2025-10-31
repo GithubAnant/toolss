@@ -916,15 +916,22 @@ export function AdminPage() {
                   required
                 >
                   <option value="">Select a category</option>
-                  <option value="AI/ML">AI/ML</option>
-                  <option value="Productivity">Productivity</option>
-                  <option value="Design">Design</option>
-                  <option value="Development">Development</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Analytics">Analytics</option>
-                  <option value="Communication">Communication</option>
-                  <option value="Finance">Finance</option>
-                  <option value="Other">Other</option>
+                  <option value="browsers">browsers</option>
+                  <option value="agents">agents</option>
+                  <option value="no code">no code</option>
+                  <option value="design">design</option>
+                  <option value="coding">coding</option>
+                  <option value="video">video</option>
+                  <option value="tools">tools</option>
+                  <option value="social">social</option>
+                  <option value="finance">finance</option>
+                  <option value="health">health</option>
+                  <option value="education">education</option>
+                  <option value="sports">sports</option>
+                  <option value="travel">travel</option>
+                  <option value="food">food</option>
+                  <option value="music">music</option>
+                  <option value="gaming">gaming</option>
                 </select>
               </div>
 
@@ -1111,15 +1118,22 @@ export function AdminPage() {
                   required
                 >
                   <option value="">Select a category</option>
-                  <option value="AI/ML">AI/ML</option>
-                  <option value="Productivity">Productivity</option>
-                  <option value="Design">Design</option>
-                  <option value="Development">Development</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Analytics">Analytics</option>
-                  <option value="Communication">Communication</option>
-                  <option value="Finance">Finance</option>
-                  <option value="Other">Other</option>
+                  <option value="browsers">browsers</option>
+                  <option value="agents">agents</option>
+                  <option value="no code">no code</option>
+                  <option value="design">design</option>
+                  <option value="coding">coding</option>
+                  <option value="video">video</option>
+                  <option value="tools">tools</option>
+                  <option value="social">social</option>
+                  <option value="finance">finance</option>
+                  <option value="health">health</option>
+                  <option value="education">education</option>
+                  <option value="sports">sports</option>
+                  <option value="travel">travel</option>
+                  <option value="food">food</option>
+                  <option value="music">music</option>
+                  <option value="gaming">gaming</option>
                 </select>
               </div>
 
