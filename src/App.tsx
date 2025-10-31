@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { Databuddy } from "@databuddy/sdk/react";
 import { useEffect } from "react";
@@ -45,6 +45,8 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/submit" element={<SubmitPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        {/* Catch all unknown routes and redirect to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Analytics />
     </BrowserRouter>
