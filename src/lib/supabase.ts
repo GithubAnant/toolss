@@ -5,12 +5,6 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Admin email whitelist - fallback for when database is not available
-export const ADMIN_EMAILS = [
-  'anantsinghal444@gmail.com',
-  'jonpad512@gmail.com' 
-];
-
 // Check if user is admin (checks database only)
 export const isAdmin = async (email: string | undefined): Promise<boolean> => {
   console.log('Checking admin status for email:', email);
