@@ -96,11 +96,13 @@ export function AdminPage() {
   };
 
   useEffect(() => {
-    let isInitialLoad = true;
+    let isMounted = true;
 
     // Check if user is authenticated and is admin
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+
+      if (!isMounted) return;
 
       if (!user || !(await isAdmin(user.email))) {
         setUnauthorized(true);
@@ -112,23 +114,13 @@ export function AdminPage() {
       setUser(user);
       setLoading(false);
       fetchData();
-      isInitialLoad = false;
     };
 
     init();
 
-    // Listen for auth changes (but skip on initial load)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (isInitialLoad) return; // Skip the initial SIGNED_IN event
-      
-      if (!session || !(await isAdmin(session.user.email))) {
-        navigate("/");
-      } else {
-        setUser(session.user);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+    };
   }, [navigate]);
 
   const addAdminEmail = async () => {
