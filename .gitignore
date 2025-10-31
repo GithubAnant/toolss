@@ -28,3 +28,7 @@ dist-ssr
 
 .env
 .env.local
+# Admin files
+ADMIN*.sql
+ADMIN*.md
+*.sql
