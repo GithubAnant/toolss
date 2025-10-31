@@ -10,7 +10,7 @@
 [![Submit Tool](https://img.shields.io/badge/➕_Submit_Tool-Contribute-blue?style=for-the-badge)](https://toolss-eight.vercel.app/submit)
 [![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-![Demo](demo.gif)
+![Demo](src/assets/demo.gif)
 
 [🌐 Visit toolss](https://toolss-eight.vercel.app) • [➕ Submit a Tool](https://toolss-eight.vercel.app/submit) • [⭐ Star on GitHub](https://github.com/GithubAnant/toolss)
 
