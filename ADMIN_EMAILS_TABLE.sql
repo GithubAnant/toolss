@@ -33,9 +33,11 @@ CREATE POLICY "Allow admins to delete admin emails"
   TO authenticated
   USING (true);
 
--- Insert initial admin email (replace with your email)
+-- Insert initial admin emails
 INSERT INTO admin_emails (email, added_by)
-VALUES ('anantsinghal444@gmail.com', 'system')
+VALUES 
+  ('anantsinghal444@gmail.com', 'system'),
+  ('jonpad512@gmail.com', 'system')
 ON CONFLICT (email) DO NOTHING;
 
 -- Add index for faster email lookups

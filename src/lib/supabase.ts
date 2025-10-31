@@ -29,14 +29,14 @@ export const isAdmin = async (email: string | undefined): Promise<boolean> => {
       .from('admin_emails')
       .select('email')
       .eq('email', normalizedEmail)
-      .single();
+      .limit(1);
     
-    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-      console.error('Error checking admin status:', error);
+    if (error) {
+      console.error('Error checking admin status from database:', error);
       return false;
     }
     
-    return !!data;
+    return data && data.length > 0;
   } catch (error) {
     console.error('Error checking admin status:', error);
     return false;
