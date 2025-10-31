@@ -9,13 +9,13 @@ const moreCategories = [
   "development tools",
   "social",
   "finance",
-  "health",
+  // "health",
   "education",
-  "sports",
-  "travel",
-  "food",
+  // "sports",
+  // "travel",
+  // "food",
   "music",
-  "gaming",
+  // "gaming",
 ];
 
 export function MoreCategoriesModal({
