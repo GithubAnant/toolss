@@ -174,6 +174,7 @@ export function SubmitPage() {
               <option value="coding">coding</option>
               <option value="video">video</option>
               <option value="tools">tools</option>
+              <option value="development tools">development tools</option>
               <option value="social">social</option>
               <option value="finance">finance</option>
               <option value="health">health</option>
@@ -183,9 +184,6 @@ export function SubmitPage() {
               <option value="food">food</option>
               <option value="music">music</option>
               <option value="gaming">gaming</option>
-              <option>Agents</option>
-              <option>No Code</option>
-              <option>Coding</option>
             </select>
           </div>
 

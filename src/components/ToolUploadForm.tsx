@@ -166,23 +166,23 @@ export function ToolUploadForm({ onSuccess, onCancel }: ToolUploadFormProps) {
               required
             >
               <option value="">Select a category</option>
-              <option value="all">All</option>
-              <option value="browsers">Browsers</option>
-              <option value="agents">Agents</option>
-              <option value="no code">No Code</option>
-              <option value="design">Design</option>
-              <option value="coding">Coding</option>
-              <option value="video">Video</option>
-              <option value="tools">Tools</option>
-              <option value="social">Social</option>
-              <option value="finance">Finance</option>
-              <option value="health">Health</option>
-              <option value="education">Education</option>
-              <option value="sports">Sports</option>
-              <option value="travel">Travel</option>
-              <option value="food">Food</option>
-              <option value="music">Music</option>
-              <option value="gaming">Gaming</option>
+              <option value="browsers">browsers</option>
+              <option value="ai">ai</option>
+              <option value="no code">no code</option>
+              <option value="design">design</option>
+              <option value="coding">coding</option>
+              <option value="video">video</option>
+              <option value="tools">tools</option>
+              <option value="development tools">development tools</option>
+              <option value="social">social</option>
+              <option value="finance">finance</option>
+              <option value="health">health</option>
+              <option value="education">education</option>
+              <option value="sports">sports</option>
+              <option value="travel">travel</option>
+              <option value="food">food</option>
+              <option value="music">music</option>
+              <option value="gaming">gaming</option>
             </select>
           </div>
 

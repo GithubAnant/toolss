@@ -6,6 +6,7 @@ interface MoreCategoriesModalProps {
 
 const moreCategories = [
   "tools",
+  "development tools",
   "social",
   "finance",
   "health",

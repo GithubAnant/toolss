@@ -923,6 +923,7 @@ export function AdminPage() {
                   <option value="coding">coding</option>
                   <option value="video">video</option>
                   <option value="tools">tools</option>
+                  <option value="development tools">development tools</option>
                   <option value="social">social</option>
                   <option value="finance">finance</option>
                   <option value="health">health</option>
@@ -1125,6 +1126,7 @@ export function AdminPage() {
                   <option value="coding">coding</option>
                   <option value="video">video</option>
                   <option value="tools">tools</option>
+                  <option value="development tools">development tools</option>
                   <option value="social">social</option>
                   <option value="finance">finance</option>
                   <option value="health">health</option>
