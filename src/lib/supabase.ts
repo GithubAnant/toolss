@@ -5,9 +5,20 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Admin email whitelist - fallback for when database is not available
+export const ADMIN_EMAILS = [
+  'anantsinghal444@gmail.com',
+  'jonpad512@gmail.com' 
+];
+
 // Check if user is admin (checks database only)
 export const isAdmin = async (email: string | undefined): Promise<boolean> => {
-  if (!email) return false;
+  console.log('Checking admin status for email:', email);
+  
+  if (!email) {
+    console.log('No email provided');
+    return false;
+  }
   
   const normalizedEmail = email.toLowerCase();
   
@@ -18,12 +29,16 @@ export const isAdmin = async (email: string | undefined): Promise<boolean> => {
       .eq('email', normalizedEmail)
       .limit(1);
     
+    console.log('Database query result:', { data, error });
+    
     if (error) {
       console.error('Error checking admin status from database:', error);
       return false;
     }
     
-    return data && data.length > 0;
+    const isAdminUser = data && data.length > 0;
+    console.log('Is admin?', isAdminUser);
+    return isAdminUser;
   } catch (error) {
     console.error('Error checking admin status:', error);
     return false;
