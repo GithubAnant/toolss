@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase, isAdmin } from "../lib/supabase";
 import type { User } from "@supabase/supabase-js";
@@ -41,7 +41,24 @@ export function AdminPage() {
   const [editTagInput, setEditTagInput] = useState("");
   const [adminEmails, setAdminEmails] = useState<AdminEmail[]>([]);
   const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [toolSearchQuery, setToolSearchQuery] = useState("");
+  const [editingTool, setEditingTool] = useState<Tool | null>(null);
+  const [editToolFormData, setEditToolFormData] = useState<Partial<Tool>>({});
+  const [editToolTagInput, setEditToolTagInput] = useState("");
   const navigate = useNavigate();
+
+  // Filter tools based on search query
+  const filteredTools = useMemo(() => {
+    if (!toolSearchQuery.trim()) return tools;
+    
+    const query = toolSearchQuery.toLowerCase();
+    return tools.filter(tool =>
+      tool.name.toLowerCase().includes(query) ||
+      tool.description.toLowerCase().includes(query) ||
+      tool.category.toLowerCase().includes(query) ||
+      (tool.tags && tool.tags.some(tag => tag.toLowerCase().includes(query)))
+    );
+  }, [tools, toolSearchQuery]);
 
   const fetchData = async () => {
     // Fetch tools
@@ -238,6 +255,75 @@ export function AdminPage() {
     } catch (error) {
       console.error("Error approving suggestion:", error);
       alert("Failed to approve suggestion");
+    }
+  };
+
+  const handleEditTool = (tool: Tool) => {
+    setEditingTool(tool);
+    setEditToolFormData({
+      name: tool.name,
+      image_link: tool.image_link,
+      website_link: tool.website_link,
+      description: tool.description,
+      launch_video_link: tool.launch_video_link || "",
+      category: tool.category,
+      tags: tool.tags || [],
+    });
+  };
+
+  const handleEditToolSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTool) return;
+
+    try {
+      // Validation
+      if (!editToolFormData.name || !editToolFormData.image_link || !editToolFormData.description || !editToolFormData.website_link || !editToolFormData.category) {
+        alert("Please fill in all required fields");
+        return;
+      }
+
+      // Update tool in database
+      const { error } = await supabase
+        .from("tools")
+        .update({
+          name: editToolFormData.name,
+          image_link: editToolFormData.image_link,
+          website_link: editToolFormData.website_link,
+          description: editToolFormData.description,
+          launch_video_link: editToolFormData.launch_video_link || null,
+          category: editToolFormData.category,
+          tags: editToolFormData.tags && editToolFormData.tags.length > 0 ? editToolFormData.tags : null,
+        })
+        .eq("id", editingTool.id);
+
+      if (error) throw error;
+
+      alert("Tool updated successfully!");
+      setEditingTool(null);
+      setEditToolFormData({});
+      fetchData();
+    } catch (error) {
+      console.error("Error updating tool:", error);
+      alert("Failed to update tool. Please try again.");
+    }
+  };
+
+  const handleAddToolTag = () => {
+    if (editToolTagInput.trim() && editToolFormData.tags) {
+      setEditToolFormData({
+        ...editToolFormData,
+        tags: [...editToolFormData.tags, editToolTagInput.trim()],
+      });
+      setEditToolTagInput("");
+    }
+  };
+
+  const handleRemoveToolTag = (tagToRemove: string) => {
+    if (editToolFormData.tags) {
+      setEditToolFormData({
+        ...editToolFormData,
+        tags: editToolFormData.tags.filter((tag) => tag !== tagToRemove),
+      });
     }
   };
 
@@ -532,36 +618,64 @@ export function AdminPage() {
           </div>
         </div>
 
-        {/* Recent Tools */}
+        {/* All Tools with Search */}
         <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-6 mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Recent Tools
-          </h2>
-          <div className="space-y-2">
-            {tools.slice(0, 10).map((tool) => (
-              <div
-                key={tool.id}
-                className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-800"
-              >
-                <img
-                  src={tool.image_link}
-                  alt={tool.name}
-                  className="w-10 h-10 object-contain rounded"
-                />
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-900 dark:text-white text-sm">{tool.name}</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{tool.category}</p>
-                </div>
-                <a
-                  href={tool.website_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-xs font-medium"
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              All Tools ({filteredTools.length})
+            </h2>
+          </div>
+          
+          {/* Search Bar */}
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Search tools by name, description, category, or tags..."
+              value={toolSearchQuery}
+              onChange={(e) => setToolSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent text-sm"
+            />
+          </div>
+
+          <div className="space-y-2 max-h-[600px] overflow-y-auto">
+            {filteredTools.length === 0 ? (
+              <p className="text-gray-500 dark:text-gray-400 text-center py-12 text-sm">
+                {toolSearchQuery ? "No tools found matching your search" : "No tools yet"}
+              </p>
+            ) : (
+              filteredTools.map((tool) => (
+                <div
+                  key={tool.id}
+                  className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-900 rounded-lg transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-800"
                 >
-                  Visit →
-                </a>
-              </div>
-            ))}
+                  <img
+                    src={tool.image_link}
+                    alt={tool.name}
+                    className="w-10 h-10 object-contain rounded"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-900 dark:text-white text-sm truncate">{tool.name}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{tool.category}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleEditTool(tool)}
+                      className="px-3 py-1.5 text-xs border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg transition-colors font-medium"
+                    >
+                      Edit
+                    </button>
+                    <a
+                      href={tool.website_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-xs font-medium"
+                    >
+                      Visit →
+                    </a>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -696,6 +810,201 @@ export function AdminPage() {
           onSuccess={handleUploadSuccess}
           onCancel={() => setShowUploadForm(false)}
         />
+      )}
+
+      {/* Edit Tool Modal */}
+      {editingTool && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-start justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-black rounded-xl p-6 max-w-lg w-full my-8 shadow-xl border border-gray-200 dark:border-gray-800 animate-in fade-in slide-in-from-bottom-4 duration-200">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Edit Tool</h2>
+              <button
+                onClick={() => {
+                  setEditingTool(null);
+                  setEditToolFormData({});
+                }}
+                className="text-gray-400 hover:text-gray-900 dark:hover:text-white text-xl w-8 h-8 rounded-md hover:bg-gray-100 dark:hover:bg-gray-900 transition-all duration-150"
+              >
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={handleEditToolSubmit} className="space-y-5">
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Tool Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={editToolFormData.name || ""}
+                  onChange={(e) => setEditToolFormData({ ...editToolFormData, name: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 transition-all duration-150"
+                  placeholder="Enter tool name"
+                  required
+                />
+              </div>
+
+              {/* Image Link */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Image URL <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="url"
+                  value={editToolFormData.image_link || ""}
+                  onChange={(e) => setEditToolFormData({ ...editToolFormData, image_link: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 transition-all duration-150"
+                  placeholder="https://example.com/image.png"
+                  required
+                />
+              </div>
+
+              {/* Website Link */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Website URL <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="url"
+                  value={editToolFormData.website_link || ""}
+                  onChange={(e) => setEditToolFormData({ ...editToolFormData, website_link: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 transition-all duration-150"
+                  placeholder="https://example.com"
+                  required
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Description <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={editToolFormData.description || ""}
+                  onChange={(e) => setEditToolFormData({ ...editToolFormData, description: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 resize-none transition-all duration-150"
+                  placeholder="Enter tool description"
+                  rows={3}
+                  required
+                />
+              </div>
+
+              {/* Launch Video Link */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Launch Video URL (Optional)
+                </label>
+                <input
+                  type="url"
+                  value={editToolFormData.launch_video_link || ""}
+                  onChange={(e) => setEditToolFormData({ ...editToolFormData, launch_video_link: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 transition-all duration-150"
+                  placeholder="https://youtube.com/watch?v=..."
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Category <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={editToolFormData.category || ""}
+                  onChange={(e) => setEditToolFormData({ ...editToolFormData, category: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-gray-900 dark:text-white transition-all duration-150"
+                  required
+                >
+                  <option value="">Select a category</option>
+                  <option value="AI/ML">AI/ML</option>
+                  <option value="Productivity">Productivity</option>
+                  <option value="Design">Design</option>
+                  <option value="Development">Development</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Analytics">Analytics</option>
+                  <option value="Communication">Communication</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Tags (Optional)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={editToolTagInput}
+                    onChange={(e) => setEditToolTagInput(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddToolTag())}
+                    className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 transition-all duration-150"
+                    placeholder="Add a tag"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddToolTag}
+                    className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-900 dark:text-white rounded-md transition-all duration-150 font-medium"
+                  >
+                    Add
+                  </button>
+                </div>
+                {editToolFormData.tags && editToolFormData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {editToolFormData.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white rounded-md text-xs font-medium border border-gray-200 dark:border-gray-800"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveToolTag(tag)}
+                          className="text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors duration-150"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Tool info */}
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-800">
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Tool ID: <span className="font-medium text-gray-900 dark:text-white font-mono">{editingTool.id}</span>
+                </p>
+                {editingTool.created_at && (
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    Created: <span className="font-medium text-gray-900 dark:text-white">{new Date(editingTool.created_at).toLocaleDateString()}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingTool(null);
+                    setEditToolFormData({});
+                  }}
+                  className="flex-1 px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-white rounded-md transition-all duration-150 font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 text-sm bg-black dark:bg-white dark:text-black text-white rounded-md hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-150 font-medium shadow-sm"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {/* Edit Suggestion Modal */}
