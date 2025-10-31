@@ -26,8 +26,8 @@ export function LearnMoreSheet() {
                 About Toolss
               </BottomSheet.Title>
               <BottomSheet.Description className="flex flex-row text-pretty text-left text-gray-500 font-semibold w-[300px]">
-                Toolss is an AI-powered icon generator that creates beautiful,
-                unique icons instantly.
+                Toolss is your ultimate library for discovering the best AI tools, 
+                productivity apps, and software across all categories.
               </BottomSheet.Description>
             </div>
             <BottomSheet.Trigger
