@@ -108,9 +108,11 @@ export default function InfiniteGrid({
   const filteredTools = React.useMemo(() => {
     let filtered = tools;
 
-    // Filter by category
+    // Filter by category (case-insensitive)
     if (selectedCategory !== "all") {
-      filtered = filtered.filter(tool => tool.category === selectedCategory);
+      filtered = filtered.filter(tool => 
+        tool.category?.toLowerCase() === selectedCategory.toLowerCase()
+      );
     }
 
     // Filter by search query
