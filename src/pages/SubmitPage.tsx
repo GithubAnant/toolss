@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { ArrowLeft } from "lucide-react";
+import { useToast } from "../contexts/ToastContext";
 
 export function SubmitPage() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     image_link: "",
@@ -34,11 +36,11 @@ export function SubmitPage() {
 
       if (error) throw error;
 
-      alert("Tool submitted successfully! We'll review it soon.");
+      showToast("Tool submitted successfully! We'll review it soon.", "success");
       navigate("/");
     } catch (error) {
       console.error("Error submitting tool:", error);
-      alert("Failed to submit tool. Please try again.");
+      showToast("Failed to submit tool. Please try again.", "error");
     } finally {
       setIsSubmitting(false);
     }

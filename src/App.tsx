@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { Databuddy } from "@databuddy/sdk/react";
 import { useEffect } from "react";
 import "./components/BottomSheet.css";
+import { ToastProvider } from "./contexts/ToastContext";
 
 // Page imports
 import { HomePage } from "./pages/HomePage";
@@ -39,17 +40,19 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
-      <Databuddy clientId="rzgzxIRFjLiP5-y4HNrlo" enableBatching={true} />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/submit" element={<SubmitPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        {/* Catch all unknown routes and redirect to home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      <Analytics />
-    </BrowserRouter>
+    <ToastProvider>
+      <BrowserRouter>
+        <Databuddy clientId="rzgzxIRFjLiP5-y4HNrlo" enableBatching={true} />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/submit" element={<SubmitPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          {/* Catch all unknown routes and redirect to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+        <Analytics />
+      </BrowserRouter>
+    </ToastProvider>
   );
 }
 

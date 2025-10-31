@@ -4,6 +4,7 @@ import { supabase, isAdmin } from "../lib/supabase";
 import type { User } from "@supabase/supabase-js";
 import type { Tool } from "../lib/supabase";
 import { ToolUploadForm } from "../components/ToolUploadForm";
+import { useToast } from "../contexts/ToastContext";
 
 interface UserSuggestion {
   id: string;
@@ -46,6 +47,7 @@ export function AdminPage() {
   const [editToolFormData, setEditToolFormData] = useState<Partial<Tool>>({});
   const [editToolTagInput, setEditToolTagInput] = useState("");
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   // Filter tools based on search query
   const filteredTools = useMemo(() => {
@@ -131,7 +133,7 @@ export function AdminPage() {
 
   const addAdminEmail = async () => {
     if (!newAdminEmail.trim()) {
-      alert("Please enter an email");
+      showToast("Please enter an email", "error");
       return;
     }
 
@@ -139,7 +141,7 @@ export function AdminPage() {
     
     // Check if email already exists
     if (adminEmails.some(admin => admin.email === email)) {
-      alert("This email is already an admin");
+      showToast("This email is already an admin", "error");
       return;
     }
 
@@ -153,18 +155,18 @@ export function AdminPage() {
 
       if (error) throw error;
 
-      alert("Admin email added successfully!");
+      showToast("Admin email added successfully!", "success");
       setNewAdminEmail("");
       fetchData();
     } catch (error) {
       console.error("Error adding admin email:", error);
-      alert("Failed to add admin email. Please try again.");
+      showToast("Failed to add admin email. Please try again.", "error");
     }
   };
 
   const removeAdminEmail = async (id: string, email: string) => {
     if (email === user?.email) {
-      alert("You cannot remove yourself as an admin");
+      showToast("You cannot remove yourself as an admin", "error");
       return;
     }
 
@@ -180,11 +182,11 @@ export function AdminPage() {
 
       if (error) throw error;
 
-      alert("Admin email removed successfully!");
+      showToast("Admin email removed successfully!", "success");
       fetchData();
     } catch (error) {
       console.error("Error removing admin email:", error);
-      alert("Failed to remove admin email");
+      showToast("Failed to remove admin email", "error");
     }
   };
 
@@ -217,11 +219,11 @@ export function AdminPage() {
 
       if (error) throw error;
 
-      alert("Tool of the Day set successfully!");
+      showToast("Tool of the Day set successfully!", "success");
       setSelectedToolForTOTD("");
     } catch (error) {
       console.error("Error setting TOTD:", error);
-      alert("Failed to set Tool of the Day");
+      showToast("Failed to set Tool of the Day", "error");
     }
   };
 
@@ -250,11 +252,11 @@ export function AdminPage() {
 
       if (updateError) throw updateError;
 
-      alert("Suggestion approved and added to tools!");
+      showToast("Suggestion approved and added to tools!", "success");
       fetchData();
     } catch (error) {
       console.error("Error approving suggestion:", error);
-      alert("Failed to approve suggestion");
+      showToast("Failed to approve suggestion", "error");
     }
   };
 
@@ -278,7 +280,7 @@ export function AdminPage() {
     try {
       // Validation
       if (!editToolFormData.name || !editToolFormData.image_link || !editToolFormData.description || !editToolFormData.website_link || !editToolFormData.category) {
-        alert("Please fill in all required fields");
+        showToast("Please fill in all required fields", "error");
         return;
       }
 
@@ -298,13 +300,13 @@ export function AdminPage() {
 
       if (error) throw error;
 
-      alert("Tool updated successfully!");
+      showToast("Tool updated successfully!", "success");
       setEditingTool(null);
       setEditToolFormData({});
       fetchData();
     } catch (error) {
       console.error("Error updating tool:", error);
-      alert("Failed to update tool. Please try again.");
+      showToast("Failed to update tool. Please try again.", "error");
     }
   };
 
@@ -347,7 +349,7 @@ export function AdminPage() {
     try {
       // Validation
       if (!editFormData.name || !editFormData.image_link || !editFormData.description || !editFormData.website_link || !editFormData.category) {
-        alert("Please fill in all required fields");
+        showToast("Please fill in all required fields", "error");
         return;
       }
 
@@ -374,13 +376,13 @@ export function AdminPage() {
 
       if (updateError) throw updateError;
 
-      alert("Tool edited and approved successfully!");
+      showToast("Tool edited and approved successfully!", "success");
       setEditingSuggestion(null);
       setEditFormData({});
       fetchData();
     } catch (error) {
       console.error("Error editing and approving suggestion:", error);
-      alert("Failed to edit and approve suggestion");
+      showToast("Failed to edit and approve suggestion", "error");
     }
   };
 
@@ -410,17 +412,15 @@ export function AdminPage() {
 
       if (error) throw error;
 
-      alert("Suggestion rejected");
+      showToast("Suggestion rejected", "info");
       fetchData();
     } catch (error) {
       console.error("Error rejecting suggestion:", error);
-      alert("Failed to reject suggestion");
+      showToast("Failed to reject suggestion", "error");
     }
   };
 
   const deleteSuggestion = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this suggestion?")) return;
-
     try {
       const { error } = await supabase
         .from("user_suggestions")
@@ -429,11 +429,11 @@ export function AdminPage() {
 
       if (error) throw error;
 
-      alert("Suggestion deleted");
+      showToast("Suggestion deleted", "success");
       fetchData();
     } catch (error) {
       console.error("Error deleting suggestion:", error);
-      alert("Failed to delete suggestion");
+      showToast("Failed to delete suggestion", "error");
     }
   };
 

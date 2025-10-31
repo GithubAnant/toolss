@@ -21,6 +21,7 @@
     "@vercel/analytics": "^1.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "geist": "^1.5.1",
     "hammerjs": "^2.0.8",
     "lucide-react": "^0.535.0",
     "motion": "^12.23.12",
