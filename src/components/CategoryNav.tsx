@@ -12,7 +12,6 @@ const categories = [
   { name: "design", color: "bg-pink-400/60" },
   { name: "coding", color: "bg-green-400/60" },
   { name: "video", color: "bg-red-400/60" },
-  { name: "development tools", color: "bg-indigo-400/60" },
 ];
 
 export function CategoryNav({
