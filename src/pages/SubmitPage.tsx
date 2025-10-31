@@ -1,13 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import type { User } from "@supabase/supabase-js";
 import { ArrowLeft } from "lucide-react";
 
 export function SubmitPage() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     image_link: "",
@@ -20,25 +17,8 @@ export function SubmitPage() {
   const [currentTag, setCurrentTag] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    // Check authentication
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-      setLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
 
     setIsSubmitting(true);
 
@@ -46,8 +26,8 @@ export function SubmitPage() {
       const { error } = await supabase.from("user_suggestions").insert([
         {
           ...formData,
-          user_id: user.id,
-          user_email: user.email,
+          user_id: null,
+          user_email: "anonymous",
           status: "pending",
         },
       ]);
@@ -74,35 +54,6 @@ export function SubmitPage() {
   const removeTag = (tag: string) => {
     setFormData({ ...formData, tags: formData.tags.filter((t) => t !== tag) });
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
-        <div className="text-gray-500 dark:text-gray-400">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Sign In Required
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-8">
-            Please sign in to submit a tool to the community.
-          </p>
-          <button
-            onClick={() => navigate("/")}
-            className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
-          >
-            Go to Home
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen h-screen w-screen overflow-y-auto overflow-x-hidden bg-white dark:bg-black transition-colors duration-150">
