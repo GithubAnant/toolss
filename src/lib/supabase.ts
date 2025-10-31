@@ -23,22 +23,34 @@ export const isAdmin = async (email: string | undefined): Promise<boolean> => {
   const normalizedEmail = email.toLowerCase();
   
   try {
-    const { data, error } = await supabase
-      .from('admin_emails')
-      .select('email')
-      .eq('email', normalizedEmail)
-      .limit(1);
-    
-    console.log('Database query result:', { data, error });
-    
-    if (error) {
-      console.error('Error checking admin status from database:', error);
-      return false;
-    }
-    
-    const isAdminUser = data && data.length > 0;
-    console.log('Is admin?', isAdminUser);
-    return isAdminUser;
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise<boolean>((resolve) => {
+      setTimeout(() => {
+        console.error('Database query timed out after 5 seconds');
+        resolve(false);
+      }, 5000);
+    });
+
+    const queryPromise = (async () => {
+      const { data, error } = await supabase
+        .from('admin_emails')
+        .select('email')
+        .eq('email', normalizedEmail)
+        .maybeSingle();
+      
+      console.log('Database query result:', { data, error });
+      
+      if (error) {
+        console.error('Error checking admin status from database:', error);
+        return false;
+      }
+      
+      const isAdminUser = !!data;
+      console.log('Is admin?', isAdminUser);
+      return isAdminUser;
+    })();
+
+    return await Promise.race([queryPromise, timeoutPromise]);
   } catch (error) {
     console.error('Error checking admin status:', error);
     return false;
