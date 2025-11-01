@@ -22,6 +22,13 @@ export function SubmitPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.image_link) {
+      setFormData((prev) => ({
+        ...prev,
+        image_link: "https://via.placeholder.com/150",
+      }));
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -101,11 +108,10 @@ export function SubmitPage() {
           {/* Logo URL */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Logo URL <span className="text-red-500">*</span>
+              Logo URL <span className="text-gray-400 text-xs">(Optional)</span>
             </label>
             <input
               type="url"
-              required
               value={formData.image_link}
               onChange={(e) =>
                 setFormData({ ...formData, image_link: e.target.value })
