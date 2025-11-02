@@ -73,6 +73,6 @@ MIT License - fork it, modify it, make it yours. Just keep it awesome.
 
 **[Visit toolss™](https://toolss-eight.vercel.app)** • **[Submit a Tool](https://toolss-eight.vercel.app/submit)** • **[Report an Issue](https://github.com/GithubAnant/toolss/issues)** • **[Star on GitHub](https://github.com/GithubAnant/toolss)**
 
-Made with ❤️  by Anant 
+Made with ❤️ by Anant 
 
 </div>
