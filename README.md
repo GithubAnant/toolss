@@ -17,29 +17,27 @@
 
 ## What is toolss™?
 
-A curated directory of AI and productivity tools that developers actually use. No fluff, no sponsored placements - just The Best™ tools that are worth your time.
-
-Browse through categories like AI/ML, productivity, design, and development utilities. Everything is searchable, filterable, and actually useful.
+A curated directory of AI and productivity tools that developers actually use. You'll find no sponsored placements - just The Best™ tools that are worth your time.
 
 ## Why toolss™ is Different
 
-**Curated Quality**: We don't just dump every tool we find. Each submission is reviewed to ensure it's actually worth discovering.
+- **Curated Quality**: We don't just dump every tool we find. Each submission is reviewed to ensure it's actually worth discovering.
 
-**Developer First**: Built by developers, for developers. The tools here are the ones we'd recommend to our team.
+- **Developer First**: Built by developers, for developers. The tools here are the ones we'd recommend to our team.
 
-**Open Source**: Community-driven and transparent. Don't like something? Submit a PR.
+- **Open Source**: Community-driven and transparent. Don't like something? Submit a PR.
 
-**Fast as Hell**: No bloat, no unnecessary JavaScript. Just a clean, fast directory that works.
+- **Fast as Hell**: No bloat, no unnecessary JavaScript. Just a clean, fast directory that works.
 
 ## Contributing
 
 We built this for the community, and we want your help making it better.
 
-### Submit a Tool
+## Submit a Tool
 
 Found something worth sharing? [Submit it here](https://toolss-eight.vercel.app/submit) and help others discover it.
 
-### Code Contributions
+## Code Contributions
 
 Want to improve the project? Here's how:
 
@@ -56,10 +54,6 @@ Want to improve the project? Here's how:
 - **Name things clearly**: Your code should be self-documenting.
 - **Comment when needed**: If it's complex, explain it.
 - **Test your changes**: Make sure nothing breaks.
-
-### Report Issues
-
-Found a bug? Have a feature request? [Open an issue](https://github.com/GithubAnant/toolss/issues) and we'll take a look.
 
 ## Project Structure
 
@@ -79,6 +73,6 @@ MIT License - fork it, modify it, make it yours. Just keep it awesome.
 
 **[Visit toolss™](https://toolss-eight.vercel.app)** • **[Submit a Tool](https://toolss-eight.vercel.app/submit)** • **[Report an Issue](https://github.com/GithubAnant/toolss/issues)** • **[Star on GitHub](https://github.com/GithubAnant/toolss)**
 
-Made with ❤️ for the developer community
+Made with ❤️  by Anant 
 
 </div>
