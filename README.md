@@ -8,6 +8,9 @@
 [![Submit Tool](https://img.shields.io/badge/➕_Submit_Tool-Contribute-blue?style=for-the-badge)](https://toolss-eight.vercel.app/submit)
 [![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
+![Demo](src/assets/demo.gif)
+
+
 </div>
 
 ---
