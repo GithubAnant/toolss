@@ -1,5 +1,6 @@
 import { RippleButton } from "./magicui/ripple-button";
 import type { Tool } from "../lib/supabase";
+import React from "react";
 
 interface SelectedImage {
   url: string;
@@ -21,9 +22,29 @@ export function ToolModal({
   onClose,
   onAnimationEnd,
 }: ToolModalProps) {
+  const [isDarkMode, setIsDarkMode] = React.useState(
+    document.documentElement.classList.contains("dark")
+  );
+
+  // Listen for dark mode changes
+  React.useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDarkMode(document.documentElement.classList.contains("dark"));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div
-      className={`modal-backdrop fixed pt-12 inset-0 flex flex-col overflow-y-auto p-4 items-center z-50 bg-white ${isExiting ? "modal-exiting" : ""}`}
+      className={`modal-backdrop backdrop-blur-3xl fixed pt-12 inset-0 flex flex-col overflow-y-auto p-4 items-center z-50 ${
+        isDarkMode ? "bg-black/35" : "bg-white/50"
+      } ${isExiting ? "modal-exiting" : ""}`}
       style={{
         pointerEvents: isExiting ? "none" : "auto",
       }}
@@ -32,7 +53,9 @@ export function ToolModal({
     >
       {/* The Image in the expanded view */}
       <div
-        className={`modal-image relative mb-6 min-h-[200px] w-full transition-all duration-600 ease-out ${isExiting ? "modal-image-exit" : ""}`}
+        className={`modal-image relative mb-6 min-h-[200px] w-fit transition-all duration-600 ease-out ${
+          isExiting ? "modal-image-exit" : ""
+        }`}
         onClick={(e) => e.stopPropagation()}
         style={{
           pointerEvents: isExiting ? "none" : "auto",
@@ -40,7 +63,10 @@ export function ToolModal({
       >
         <img
           src={selectedImage.url}
-          alt={selectedImage.tool?.name || `Image ${selectedImage.row}-${selectedImage.col}`}
+          alt={
+            selectedImage.tool?.name ||
+            `Image ${selectedImage.row}-${selectedImage.col}`
+          }
           draggable="false"
           className="mx-auto w-full max-w-[280px] h-full rounded-2xl object-contain"
         />
@@ -48,7 +74,9 @@ export function ToolModal({
 
       {/* The description section */}
       <div
-        className={`modal-content flex w-[300px] flex-col justify-center p-4 text-black transition-all duration-700 ease-out ${isExiting ? "modal-content-exit" : ""}`}
+        className={`modal-content flex w-[300px] flex-col justify-center p-4  transition-all duration-700 ease-out
+          ${isDarkMode ? "text-white" : "text-black"} 
+          ${isExiting ? "modal-content-exit" : ""}`}
         onClick={(e) => e.stopPropagation()}
         style={{
           pointerEvents: isExiting ? "none" : "auto",
@@ -60,7 +88,11 @@ export function ToolModal({
             {selectedImage.tool.tags.map((tag, index) => (
               <span
                 key={index}
-                className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-normal border-black/30 bg-black/10 text-black/80 cursor-pointer"
+                className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-normal cursor-pointer ${
+                  isDarkMode
+                    ? "border-white/30 bg-white/10 text-white/80 "
+                    : "border-black/30 bg-black/10 text-black/80 "
+                }`}
               >
                 {tag}
               </span>
@@ -75,13 +107,21 @@ export function ToolModal({
 
         {/* Category */}
         {selectedImage.tool?.category && (
-          <div className="mb-2 text-sm font-semibold text-black/60 uppercase tracking-wide">
+          <div
+            className={`mb-2 text-sm font-semibold uppercase tracking-wide ${
+              isDarkMode ? "text-white/60" : "text-black/60"
+            } `}
+          >
             {selectedImage.tool.category}
           </div>
         )}
 
         {/* Description */}
-        <p className="text-base text-black/80 mb-4">
+        <p
+          className={`text-base mb-4 ${
+            isDarkMode ? "text-white/80" : "text-black/80"
+          }`}
+        >
           {selectedImage.tool?.description ||
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
         </p>
@@ -106,13 +146,17 @@ export function ToolModal({
 
         {/* Action buttons */}
         <div
-          className={`modal-actions flex w-full gap-4 py-5 items-center justify-center transition-all duration-700 ease-out ${isExiting ? "modal-actions-exit" : ""}`}
+          className={`modal-actions flex w-full gap-4 py-5 items-center justify-center transition-all duration-700 ease-out ${
+            isExiting ? "modal-actions-exit" : ""
+          }`}
           style={{
             pointerEvents: isExiting ? "none" : "auto",
           }}
         >
           <RippleButton
-            className="bg-black w-[120px] rounded-full text-white border-none"
+            className={`w-[120px] rounded-full border-none ${
+              isDarkMode ? "bg-white text-black" : "bg-black text-white"
+            } `}
             onClick={(e) => {
               e.stopPropagation();
               onClose();
@@ -124,14 +168,16 @@ export function ToolModal({
           {/* Visit Website Button */}
           {selectedImage.tool?.website_link && (
             <RippleButton
-              className="bg-black w-[120px] rounded-full text-white border-none"
+              className={`w-[120px] rounded-full border-none ${
+                isDarkMode ? "bg-white text-black" : "bg-black text-white"
+              } `}
               onClick={(e) => {
                 e.stopPropagation();
                 if (selectedImage.tool?.website_link) {
                   window.open(
                     selectedImage.tool.website_link,
                     "_blank",
-                    "noopener,noreferrer",
+                    "noopener,noreferrer"
                   );
                 }
               }}
