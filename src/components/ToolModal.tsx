@@ -53,7 +53,7 @@ export function ToolModal({
     >
       {/* The Image in the expanded view */}
       <div
-        className={`modal-image relative mb-6 min-h-[200px] w-full transition-all duration-600 ease-out ${
+        className={`modal-image relative mb-6 min-h-[200px] w-fit transition-all duration-600 ease-out ${
           isExiting ? "modal-image-exit" : ""
         }`}
         onClick={(e) => e.stopPropagation()}
