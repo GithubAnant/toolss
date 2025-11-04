@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import { useToast } from "../contexts/ToastContext";
+import { Listbox } from "@headlessui/react";
+import categories from "@/constants/categories";
 
 export function SubmitPage() {
   const navigate = useNavigate();
@@ -43,7 +45,10 @@ export function SubmitPage() {
 
       if (error) throw error;
 
-      showToast("Tool submitted successfully! We'll review it soon.", "success");
+      showToast(
+        "Tool submitted successfully! We'll review it soon.",
+        "success"
+      );
       navigate("/");
     } catch (error) {
       console.error("Error submitting tool:", error);
@@ -99,7 +104,9 @@ export function SubmitPage() {
               type="text"
               required
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all"
               placeholder="e.g., ChatGPT"
             />
@@ -166,31 +173,54 @@ export function SubmitPage() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Category <span className="text-red-500">*</span>
             </label>
-            <select
+            <Listbox
               value={formData.category}
-              onChange={(e) =>
-                setFormData({ ...formData, category: e.target.value })
+              onChange={(value) =>
+                setFormData({ ...formData, category: value })
               }
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all"
             >
-              <option value="browsers">browsers</option>
-              <option value="ai">ai</option>
-              <option value="no code">no code</option>
-              <option value="design">design</option>
-              <option value="coding">coding</option>
-              <option value="video">video</option>
-              <option value="tools">tools</option>
-              <option value="development tools">development tools</option>
-              <option value="social">social</option>
-              <option value="finance">finance</option>
-              <option value="health">health</option>
-              <option value="education">education</option>
-              <option value="sports">sports</option>
-              <option value="travel">travel</option>
-              <option value="food">food</option>
-              <option value="music">music</option>
-              <option value="gaming">gaming</option>
-            </select>
+              <div className="relative">
+                <Listbox.Button className="w-full px-4 py-3 text-left border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all flex items-center justify-between">
+                  <span>{formData.category}</span>
+                  <ChevronDown
+                    size={20}
+                    className="text-gray-500 dark:text-gray-400"
+                  />
+                </Listbox.Button>
+                <Listbox.Options className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md bg-white dark:bg-gray-900 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                  {categories.map((category) => (
+                    <Listbox.Option
+                      key={category.value}
+                      value={category.value}
+                      className={({ active }) =>
+                        `cursor-default select-none relative py-2 pl-10 pr-4 ${
+                          active
+                            ? "bg-blue-100 dark:bg-blue-900 text-black dark:text-white"
+                            : "text-gray-900 dark:text-gray-200"
+                        }`
+                      }
+                    >
+                      {({ selected }) => (
+                        <>
+                          <span
+                            className={`block truncate ${
+                              selected ? "font-medium" : "font-normal"
+                            }`}
+                          >
+                            {category.label}
+                          </span>
+                          {selected && (
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600 dark:text-blue-400">
+                              ✓
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </Listbox.Option>
+                  ))}
+                </Listbox.Options>
+              </div>
+            </Listbox>
           </div>
 
           {/* Launch Video URL (Optional) */}

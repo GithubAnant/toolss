@@ -25,7 +25,9 @@ export function CategoryNav({
         <button
           key={category.name}
           onClick={() => onCategoryChange(category.name)}
-          className={`px-2 py-1 md:px-4 md:py-2 rounded-full text-xs md:text-sm transition-all backdrop-blur-lg ${category.color} text-white ${
+          className={`px-2 py-1 md:px-4 md:py-2 rounded-full text-xs md:text-sm transition-all backdrop-blur-lg ${
+            category.color
+          } text-white duration-200 ease-in-out cursor-pointer ${
             selectedCategory === category.name
               ? "font-bold scale-105 border-1 border-color border-white"
               : "font-medium scale-100"

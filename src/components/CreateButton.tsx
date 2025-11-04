@@ -6,7 +6,7 @@ export function CreateButton() {
   return (
     <button
       onClick={() => navigate("/submit")}
-      className="bg-black/50 hover:bg-black/70 rounded-full px-6 py-2.5 text-white font-bold text-sm whitespace-nowrap transition-all"
+      className="bg-black/30 hover:bg-black/70 rounded-full px-6 py-3 text-white/70 font-bold text-xs whitespace-nowrap transition-all backdrop-blur-lg hover:text-white duration-200 ease-in-out cursor-pointer"
     >
       + Upload a Tool
     </button>
