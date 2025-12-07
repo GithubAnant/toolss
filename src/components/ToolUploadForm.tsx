@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { Tool } from "../lib/supabase";
+import { Upload } from "lucide-react";
+import { uploadImage, validateImageFile, downloadAndUploadImage } from "../lib/storage";
 
 interface ToolUploadFormProps {
   onSuccess: () => void;
@@ -10,16 +12,40 @@ interface ToolUploadFormProps {
 export function ToolUploadForm({ onSuccess, onCancel }: ToolUploadFormProps) {
   const [formData, setFormData] = useState<Partial<Tool>>({
     name: "",
-    image_link: "",
     description: "",
     website_link: "",
     launch_video_link: "",
     tags: [],
     category: "",
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [uploadMode, setUploadMode] = useState<"file" | "url">("file");
   const [tagInput, setTagInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      setError(validation.error || "Invalid image file");
+      return;
+    }
+
+    setImageFile(file);
+    setError(null);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,17 +53,30 @@ export function ToolUploadForm({ onSuccess, onCancel }: ToolUploadFormProps) {
     setError(null);
 
     // Validation
-    if (!formData.name || !formData.image_link || !formData.description || !formData.website_link || !formData.category) {
-      setError("Please fill in all required fields");
+    if (!formData.name || (!imageFile && uploadMode === "file") || (!imageUrl.trim() && uploadMode === "url") || !formData.description || !formData.website_link || !formData.category) {
+      setError("Please fill in all required fields and provide an image");
       setLoading(false);
       return;
     }
 
     try {
+      // Upload image first
+      let finalImageUrl: string | null = null;
+      
+      if (uploadMode === "file" && imageFile) {
+        finalImageUrl = await uploadImage(imageFile);
+      } else if (uploadMode === "url" && imageUrl.trim()) {
+        finalImageUrl = await downloadAndUploadImage(imageUrl.trim());
+      }
+      
+      if (!finalImageUrl) {
+        throw new Error("Failed to upload image");
+      }
+
       const { error: insertError } = await supabase.from("tools").insert([
         {
           name: formData.name,
-          image_link: formData.image_link,
+          image_link: finalImageUrl,
           description: formData.description,
           website_link: formData.website_link,
           launch_video_link: formData.launch_video_link || null,
@@ -109,19 +148,74 @@ export function ToolUploadForm({ onSuccess, onCancel }: ToolUploadFormProps) {
             />
           </div>
 
-          {/* Logo URL */}
+          {/* Logo Upload */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Logo URL <span className="text-red-500">*</span>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+              Logo Image <span className="text-red-500">*</span>
             </label>
-            <input
-              type="url"
-              value={formData.image_link}
-              onChange={(e) => setFormData({ ...formData, image_link: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="https://example.com/logo.png"
-              required
-            />
+            
+            {/* Toggle between File Upload and URL */}
+            <div className="flex gap-2 mb-2">
+              <button
+                type="button"
+                onClick={() => setUploadMode("file")}
+                className={`flex-1 px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
+                  uploadMode === "file"
+                    ? "bg-black dark:bg-white text-white dark:text-black"
+                    : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                Upload File
+              </button>
+              <button
+                type="button"
+                onClick={() => setUploadMode("url")}
+                className={`flex-1 px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
+                  uploadMode === "url"
+                    ? "bg-black dark:bg-white text-white dark:text-black"
+                    : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                Use URL
+              </button>
+            </div>
+
+            {uploadMode === "file" ? (
+              <label className="flex items-center justify-center w-full px-4 py-8 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer hover:border-gray-400 dark:hover:border-gray-600 transition-all">
+                <div className="flex flex-col items-center gap-2">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Preview" className="w-24 h-24 object-contain rounded" />
+                  ) : (
+                    <Upload size={32} className="text-gray-400" />
+                  )}
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {imageFile ? imageFile.name : "Click to upload logo"}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    PNG, JPG, GIF, WebP, SVG (max 5MB)
+                  </span>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </label>
+            ) : (
+              <div>
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
+                  placeholder="https://example.com/logo.png"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  We'll download and store this image permanently
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Website Link */}

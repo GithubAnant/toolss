@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, ChevronDown } from "lucide-react";
+import { ArrowLeft, Upload, ChevronDown } from "lucide-react";
 import { useToast } from "../contexts/ToastContext";
+import { uploadImage, validateImageFile, downloadAndUploadImage } from "../lib/storage";
 import { Listbox } from "@headlessui/react";
 import categories from "@/constants/categories";
 
@@ -11,32 +12,69 @@ export function SubmitPage() {
   const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
-    image_link: "",
     website_link: "",
     description: "",
     launch_video_link: "",
     category: "browsers",
     tags: [] as string[],
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [uploadMode, setUploadMode] = useState<"file" | "url">("file");
   const [currentTag, setCurrentTag] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      showToast(validation.error || "Invalid image file", "error");
+      return;
+    }
+
+    setImageFile(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.image_link) {
-      setFormData((prev) => ({
-        ...prev,
-        image_link: "https://via.placeholder.com/150",
-      }));
-    }
-
     setIsSubmitting(true);
 
     try {
+      let finalImageUrl = "https://via.placeholder.com/150"; // Default placeholder
+      
+      // Upload image if provided (file or URL)
+      if (uploadMode === "file" && imageFile) {
+        const uploadedUrl = await uploadImage(imageFile);
+        if (uploadedUrl) {
+          finalImageUrl = uploadedUrl;
+        } else {
+          showToast("Failed to upload image. Using placeholder.", "error");
+        }
+      } else if (uploadMode === "url" && imageUrl.trim()) {
+        showToast("Downloading and uploading image...", "info");
+        const uploadedUrl = await downloadAndUploadImage(imageUrl.trim());
+        if (uploadedUrl) {
+          finalImageUrl = uploadedUrl;
+        } else {
+          showToast("Failed to download image. Using placeholder.", "error");
+        }
+      }
+
       const { error } = await supabase.from("user_suggestions").insert([
         {
           ...formData,
+          image_link: finalImageUrl,
           user_id: null,
           user_email: "anonymous",
           status: "pending",
@@ -112,22 +150,81 @@ export function SubmitPage() {
             />
           </div>
 
-          {/* Logo URL */}
+          {/* Logo Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Logo URL <span className="text-gray-400 text-xs">(Optional)</span>
+              Logo Image <span className="text-gray-400 text-xs">(Optional)</span>
             </label>
-            <input
-              type="url"
-              value={formData.image_link}
-              onChange={(e) =>
-                setFormData({ ...formData, image_link: e.target.value })
-              }
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all"
-              placeholder="https://example.com/logo.png"
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Direct link to the tool's logo image
+            
+            {/* Toggle between File Upload and URL */}
+            <div className="flex gap-2 mb-3">
+              <button
+                type="button"
+                onClick={() => setUploadMode("file")}
+                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
+                  uploadMode === "file"
+                    ? "bg-black dark:bg-white text-white dark:text-black"
+                    : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                Upload File
+              </button>
+              <button
+                type="button"
+                onClick={() => setUploadMode("url")}
+                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
+                  uploadMode === "url"
+                    ? "bg-black dark:bg-white text-white dark:text-black"
+                    : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                Use URL
+              </button>
+            </div>
+
+            {uploadMode === "file" ? (
+              <div className="flex flex-col gap-3">
+                <label className="flex items-center justify-center w-full px-4 py-8 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer hover:border-gray-400 dark:hover:border-gray-600 transition-all bg-white dark:bg-gray-900">
+                  <div className="flex flex-col items-center gap-2">
+                    {imagePreview ? (
+                      <img src={imagePreview} alt="Preview" className="w-24 h-24 object-contain rounded" />
+                    ) : (
+                      <Upload size={32} className="text-gray-400" />
+                    )}
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {imageFile ? imageFile.name : "Click to upload logo"}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-500">
+                      PNG, JPG, GIF, WebP, SVG (max 5MB)
+                    </span>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            ) : (
+              <div>
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all"
+                  placeholder="https://example.com/logo.png"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  We'll download this image and store it permanently in our storage
+                </p>
+              </div>
+            )}
+            
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              {uploadMode === "file" 
+                ? "Upload the tool's logo image. If not provided, a placeholder will be used."
+                : "Provide an image URL and we'll download and store it permanently."}
             </p>
           </div>
 

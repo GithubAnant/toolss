@@ -5,6 +5,8 @@ import type { User } from "@supabase/supabase-js";
 import type { Tool } from "../lib/supabase";
 import { ToolUploadForm } from "../components/ToolUploadForm";
 import { useToast } from "../contexts/ToastContext";
+import { Upload } from "lucide-react";
+import { uploadImage, validateImageFile, downloadAndUploadImage } from "../lib/storage";
 
 interface UserSuggestion {
   id: string;
@@ -46,6 +48,15 @@ export function AdminPage() {
   const [editingTool, setEditingTool] = useState<Tool | null>(null);
   const [editToolFormData, setEditToolFormData] = useState<Partial<Tool>>({});
   const [editToolTagInput, setEditToolTagInput] = useState("");
+  const [editToolImageFile, setEditToolImageFile] = useState<File | null>(null);
+  const [editToolImagePreview, setEditToolImagePreview] = useState<string | null>(null);
+  const [editToolImageUrl, setEditToolImageUrl] = useState("");
+  const [editToolUploadMode, setEditToolUploadMode] = useState<"file" | "url" | "keep">("keep");
+  const [editSuggestionImageFile, setEditSuggestionImageFile] = useState<File | null>(null);
+  const [editSuggestionImagePreview, setEditSuggestionImagePreview] = useState<string | null>(null);
+  const [editSuggestionImageUrl, setEditSuggestionImageUrl] = useState("");
+  const [editSuggestionUploadMode, setEditSuggestionUploadMode] = useState<"file" | "url" | "keep">("keep");
+  const [toolToDelete, setToolToDelete] = useState<Tool | null>(null);
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -263,6 +274,29 @@ export function AdminPage() {
       category: tool.category,
       tags: tool.tags || [],
     });
+    setEditToolUploadMode("keep");
+    setEditToolImageFile(null);
+    setEditToolImagePreview(null);
+    setEditToolImageUrl("");
+  };
+
+  const handleEditToolImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      showToast(validation.error || "Invalid image file", "error");
+      return;
+    }
+
+    setEditToolImageFile(file);
+    
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setEditToolImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleEditToolSubmit = async (e: React.FormEvent) => {
@@ -271,8 +305,34 @@ export function AdminPage() {
 
     try {
       // Validation
-      if (!editToolFormData.name || !editToolFormData.image_link || !editToolFormData.description || !editToolFormData.website_link || !editToolFormData.category) {
+      if (!editToolFormData.name || !editToolFormData.description || !editToolFormData.website_link || !editToolFormData.category) {
         showToast("Please fill in all required fields", "error");
+        return;
+      }
+
+      let finalImageUrl = editToolFormData.image_link || "";
+
+      // Handle new image upload if mode is not "keep"
+      if (editToolUploadMode === "file" && editToolImageFile) {
+        const uploadedUrl = await uploadImage(editToolImageFile);
+        if (uploadedUrl) {
+          finalImageUrl = uploadedUrl;
+        } else {
+          showToast("Failed to upload image", "error");
+          return;
+        }
+      } else if (editToolUploadMode === "url" && editToolImageUrl.trim()) {
+        const uploadedUrl = await downloadAndUploadImage(editToolImageUrl.trim());
+        if (uploadedUrl) {
+          finalImageUrl = uploadedUrl;
+        } else {
+          showToast("Failed to download and upload image", "error");
+          return;
+        }
+      }
+
+      if (!finalImageUrl) {
+        showToast("Image is required", "error");
         return;
       }
 
@@ -281,7 +341,7 @@ export function AdminPage() {
         .from("tools")
         .update({
           name: editToolFormData.name,
-          image_link: editToolFormData.image_link,
+          image_link: finalImageUrl,
           website_link: editToolFormData.website_link,
           description: editToolFormData.description,
           launch_video_link: editToolFormData.launch_video_link || null,
@@ -295,6 +355,10 @@ export function AdminPage() {
       showToast("Tool updated successfully!", "success");
       setEditingTool(null);
       setEditToolFormData({});
+      setEditToolUploadMode("keep");
+      setEditToolImageFile(null);
+      setEditToolImagePreview(null);
+      setEditToolImageUrl("");
       fetchData();
     } catch (error) {
       console.error("Error updating tool:", error);
@@ -321,6 +385,37 @@ export function AdminPage() {
     }
   };
 
+  const handleDeleteTool = async () => {
+    if (!toolToDelete) return;
+
+    try {
+      // Delete from database
+      const { error } = await supabase
+        .from("tools")
+        .delete()
+        .eq("id", toolToDelete.id);
+
+      if (error) throw error;
+
+      // Optionally delete image from storage if it's a Supabase Storage URL
+      if (toolToDelete.image_link && toolToDelete.image_link.includes("supabase.co/storage")) {
+        try {
+          await deleteImage(toolToDelete.image_link);
+        } catch (imgError) {
+          console.error("Failed to delete image from storage:", imgError);
+          // Don't fail the whole operation if image deletion fails
+        }
+      }
+
+      showToast(`Tool "${toolToDelete.name}" deleted successfully!`, "success");
+      setToolToDelete(null);
+      fetchData();
+    } catch (error) {
+      console.error("Error deleting tool:", error);
+      showToast("Failed to delete tool. Please try again.", "error");
+    }
+  };
+
   const handleEditSuggestion = (suggestion: UserSuggestion) => {
     setEditingSuggestion(suggestion);
     setEditFormData({
@@ -332,6 +427,29 @@ export function AdminPage() {
       category: suggestion.category,
       tags: suggestion.tags || [],
     });
+    setEditSuggestionUploadMode("keep");
+    setEditSuggestionImageFile(null);
+    setEditSuggestionImagePreview(null);
+    setEditSuggestionImageUrl("");
+  };
+
+  const handleEditSuggestionImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      showToast(validation.error || "Invalid image file", "error");
+      return;
+    }
+
+    setEditSuggestionImageFile(file);
+    
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setEditSuggestionImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
@@ -340,8 +458,34 @@ export function AdminPage() {
 
     try {
       // Validation
-      if (!editFormData.name || !editFormData.image_link || !editFormData.description || !editFormData.website_link || !editFormData.category) {
+      if (!editFormData.name || !editFormData.description || !editFormData.website_link || !editFormData.category) {
         showToast("Please fill in all required fields", "error");
+        return;
+      }
+
+      let finalImageUrl = editFormData.image_link || "";
+
+      // Handle new image upload if mode is not "keep"
+      if (editSuggestionUploadMode === "file" && editSuggestionImageFile) {
+        const uploadedUrl = await uploadImage(editSuggestionImageFile);
+        if (uploadedUrl) {
+          finalImageUrl = uploadedUrl;
+        } else {
+          showToast("Failed to upload image", "error");
+          return;
+        }
+      } else if (editSuggestionUploadMode === "url" && editSuggestionImageUrl.trim()) {
+        const uploadedUrl = await downloadAndUploadImage(editSuggestionImageUrl.trim());
+        if (uploadedUrl) {
+          finalImageUrl = uploadedUrl;
+        } else {
+          showToast("Failed to download and upload image", "error");
+          return;
+        }
+      }
+
+      if (!finalImageUrl) {
+        showToast("Image is required", "error");
         return;
       }
 
@@ -349,7 +493,7 @@ export function AdminPage() {
       const { error: insertError } = await supabase.from("tools").insert([
         {
           name: editFormData.name,
-          image_link: editFormData.image_link,
+          image_link: finalImageUrl,
           website_link: editFormData.website_link,
           description: editFormData.description,
           launch_video_link: editFormData.launch_video_link || null,
@@ -371,6 +515,10 @@ export function AdminPage() {
       showToast("Tool edited and approved successfully!", "success");
       setEditingSuggestion(null);
       setEditFormData({});
+      setEditSuggestionUploadMode("keep");
+      setEditSuggestionImageFile(null);
+      setEditSuggestionImagePreview(null);
+      setEditSuggestionImageUrl("");
       fetchData();
     } catch (error) {
       console.error("Error editing and approving suggestion:", error);
@@ -656,6 +804,12 @@ export function AdminPage() {
                     >
                       Edit
                     </button>
+                    <button
+                      onClick={() => setToolToDelete(tool)}
+                      className="px-3 py-1.5 text-xs border border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-950 text-red-600 dark:text-red-400 rounded-lg transition-colors font-medium"
+                    >
+                      Delete
+                    </button>
                     <a
                       href={tool.website_link}
                       target="_blank"
@@ -837,19 +991,93 @@ export function AdminPage() {
                 />
               </div>
 
-              {/* Image Link */}
+              {/* Image Upload/URL */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Image URL <span className="text-red-500">*</span>
+                  Logo Image <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="url"
-                  value={editToolFormData.image_link || ""}
-                  onChange={(e) => setEditToolFormData({ ...editToolFormData, image_link: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 transition-all duration-150"
-                  placeholder="https://example.com/image.png"
-                  required
-                />
+                
+                {/* Current Image Preview */}
+                {editToolFormData.image_link && editToolUploadMode === "keep" && (
+                  <div className="mb-2 flex items-center gap-2">
+                    <img src={editToolFormData.image_link} alt="Current" className="w-16 h-16 object-contain rounded border" />
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Current image</span>
+                  </div>
+                )}
+                
+                {/* Toggle buttons */}
+                <div className="flex gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditToolUploadMode("keep")}
+                    className={`flex-1 px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
+                      editToolUploadMode === "keep"
+                        ? "bg-black dark:bg-white text-white dark:text-black"
+                        : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    Keep Current
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditToolUploadMode("file")}
+                    className={`flex-1 px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
+                      editToolUploadMode === "file"
+                        ? "bg-black dark:bg-white text-white dark:text-black"
+                        : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    Upload New
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditToolUploadMode("url")}
+                    className={`flex-1 px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
+                      editToolUploadMode === "url"
+                        ? "bg-black dark:bg-white text-white dark:text-black"
+                        : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    Use URL
+                  </button>
+                </div>
+
+                {/* Upload/URL inputs */}
+                {editToolUploadMode === "file" && (
+                  <label className="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer hover:border-gray-400 dark:hover:border-gray-600 transition-all">
+                    <div className="flex flex-col items-center gap-2">
+                      {editToolImagePreview ? (
+                        <img src={editToolImagePreview} alt="Preview" className="w-16 h-16 object-contain rounded" />
+                      ) : (
+                        <Upload size={24} className="text-gray-400" />
+                      )}
+                      <span className="text-xs text-gray-600 dark:text-gray-400">
+                        {editToolImageFile ? editToolImageFile.name : "Click to upload"}
+                      </span>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEditToolImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+                
+                {editToolUploadMode === "url" && (
+                  <div>
+                    <input
+                      type="url"
+                      value={editToolImageUrl}
+                      onChange={(e) => setEditToolImageUrl(e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white bg-white dark:bg-black text-gray-900 dark:text-white"
+                      placeholder="https://example.com/logo.png"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      We'll download and store this permanently
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Website Link */}
@@ -1007,6 +1235,59 @@ export function AdminPage() {
         </div>
       )}
 
+      {/* Delete Confirmation Modal */}
+      {toolToDelete && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-black rounded-xl p-6 max-w-md w-full shadow-xl border border-gray-200 dark:border-gray-800 animate-in fade-in slide-in-from-bottom-4 duration-200">
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Delete Tool</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete{" "}
+                <span className="font-semibold text-gray-900 dark:text-white">
+                  {toolToDelete.name}
+                </span>
+                ? This action cannot be undone.
+              </p>
+            </div>
+
+            {/* Tool Preview */}
+            <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 mb-6">
+              <img
+                src={toolToDelete.image_link}
+                alt={toolToDelete.name}
+                className="w-12 h-12 object-contain rounded"
+              />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-gray-900 dark:text-white text-sm truncate">
+                  {toolToDelete.name}
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {toolToDelete.category}
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setToolToDelete(null)}
+                className="flex-1 px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-white rounded-md transition-all duration-150 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteTool}
+                className="flex-1 px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md transition-all duration-150 font-medium shadow-sm"
+              >
+                Delete Tool
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Edit Suggestion Modal */}
       {editingSuggestion && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-start justify-center p-4 overflow-y-auto">
@@ -1040,19 +1321,93 @@ export function AdminPage() {
                 />
               </div>
 
-              {/* Image Link */}
+              {/* Image Upload/URL */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Image URL <span className="text-red-500">*</span>
+                  Logo Image <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="url"
-                  value={editFormData.image_link || ""}
-                  onChange={(e) => setEditFormData({ ...editFormData, image_link: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 transition-all duration-150"
-                  placeholder="https://example.com/image.png"
-                  required
-                />
+                
+                {/* Current Image Preview */}
+                {editFormData.image_link && editSuggestionUploadMode === "keep" && (
+                  <div className="mb-2 flex items-center gap-2">
+                    <img src={editFormData.image_link} alt="Current" className="w-16 h-16 object-contain rounded border" />
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Current image</span>
+                  </div>
+                )}
+                
+                {/* Toggle buttons */}
+                <div className="flex gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditSuggestionUploadMode("keep")}
+                    className={`flex-1 px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
+                      editSuggestionUploadMode === "keep"
+                        ? "bg-black dark:bg-white text-white dark:text-black"
+                        : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    Keep Current
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditSuggestionUploadMode("file")}
+                    className={`flex-1 px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
+                      editSuggestionUploadMode === "file"
+                        ? "bg-black dark:bg-white text-white dark:text-black"
+                        : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    Upload New
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditSuggestionUploadMode("url")}
+                    className={`flex-1 px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
+                      editSuggestionUploadMode === "url"
+                        ? "bg-black dark:bg-white text-white dark:text-black"
+                        : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    Use URL
+                  </button>
+                </div>
+
+                {/* Upload/URL inputs */}
+                {editSuggestionUploadMode === "file" && (
+                  <label className="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer hover:border-gray-400 dark:hover:border-gray-600 transition-all">
+                    <div className="flex flex-col items-center gap-2">
+                      {editSuggestionImagePreview ? (
+                        <img src={editSuggestionImagePreview} alt="Preview" className="w-16 h-16 object-contain rounded" />
+                      ) : (
+                        <Upload size={24} className="text-gray-400" />
+                      )}
+                      <span className="text-xs text-gray-600 dark:text-gray-400">
+                        {editSuggestionImageFile ? editSuggestionImageFile.name : "Click to upload"}
+                      </span>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEditSuggestionImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+                
+                {editSuggestionUploadMode === "url" && (
+                  <div>
+                    <input
+                      type="url"
+                      value={editSuggestionImageUrl}
+                      onChange={(e) => setEditSuggestionImageUrl(e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white bg-white dark:bg-black text-gray-900 dark:text-white"
+                      placeholder="https://example.com/logo.png"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      We'll download and store this permanently
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Website Link */}
