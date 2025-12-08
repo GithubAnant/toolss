@@ -128,50 +128,15 @@ export default function InfiniteGrid({
     return filtered;
   }, [tools, selectedCategory, searchQuery]);
 
-  // Fallback sample images for loading state
-  const sampleImages = [
-    "https://framerusercontent.com/images/qrhJzoswjJnmdvWqADcTtOrAAA.png",
-    "https://framerusercontent.com/images/8VtFSuyoDA1vXYLsfLa4dy6GAY.webp",
-    "https://framerusercontent.com/images/W9UTMahWzQKsdGvPtz2YpHc.webp",
-    "https://framerusercontent.com/images/hhFhqYTYimGV63BSgFox2gobMo.webp",
-    "https://framerusercontent.com/images/W9UTMahWzQKsdGvPtz2YpHc.webp",
-    "https://framerusercontent.com/images/Km70oxvl38d5hDjFDWWqtaYpdV8.webp",
-    "https://framerusercontent.com/images/hthEu4F0FLEEi3gun8kY1GHOqp0.webp",
-    "https://framerusercontent.com/images/bSivP8Mzbtl00d6WLwDDi64PsA.webp",
-    "https://framerusercontent.com/images/3DJXX6uTkMcfs5DbXJ8NuCZPmk.webp",
-    "https://framerusercontent.com/images/epRtIfMOaeRYz1ttz210xdOLtyQ.webp",
-    "https://framerusercontent.com/images/W8Nzsu5U5JZ0iETP5n5k8Eng8.webp",
-    "https://framerusercontent.com/images/lKfRi5o9RkMINgNd79Q7F7Jpww.webp",
-    "https://framerusercontent.com/images/VEJ29weHyAEpUuHaSBj71HPq0w.webp",
-    "https://framerusercontent.com/images/80iDV1pxIy2YeACwT9EEqlhkD0Y.webp",
-    "https://framerusercontent.com/images/DwH1PJQGakYxjMpybgvw4OAEWEw.webp",
-    "https://framerusercontent.com/images/gCieJYpCaQVvTqOsmeotIiAQADQ.webp",
-    "https://framerusercontent.com/images/qVW1FEzSGvMRNO0hSFNBXhLQzi4.webp",
-    "https://framerusercontent.com/images/f6MYuCCjZaDDbwLzjS30AlpZ1gc.webp",
-    "https://framerusercontent.com/images/s2sR4mFudadfNus4n4pLNP33Cc8.webp",
-    "https://framerusercontent.com/images/KgTKQtYjAqOGgV3kPvaKc8kqxA.webp",
-    "https://framerusercontent.com/images/ZEUQhs1MydWIBOiRUSRstkGCI4.webp",
-    "https://framerusercontent.com/images/a9pFS5PyF5pz5fpfugzbt4bQJ8.webp",
-    "https://framerusercontent.com/images/XIpfsHP6lhJmZiIAQmEPNWEE.webp",
-    "https://framerusercontent.com/images/j7EzXceW96qbVMbXND7FIRWmAk.webp",
-    "https://framerusercontent.com/images/nqhYnh1ID0iX4vRAHjoXmYWGus.webp",
-    "https://framerusercontent.com/images/cbQGcUZqOMYFSxIHbHlrUKCE9WY.webp",
-    "https://framerusercontent.com/images/IYsBl7S0PeDDbJKf37cHmBf9rPw.webp",
-    "https://framerusercontent.com/images/a3r7F29fNNZN8NW02b9wsU4kR8.webp",
-    "https://framerusercontent.com/images/bRYjNjqPmxwoPPjIifkEaaEAT8.webp",
-    "https://framerusercontent.com/images/YumhrVDUnAcRhW1CUhdVyGDLoIk.webp",
-    "https://framerusercontent.com/images/2BnFYwAUj5YFBAYPXs1wiVnhatw.webp",
-  ];
-
   // Get tool data for a specific cell
-  const getToolForCell = (row: number, col: number): { imageUrl: string; tool?: Tool } => {
+  const getToolForCell = (row: number, col: number): { imageUrl: string; tool?: Tool } | null => {
     if (isLoading || filteredTools.length === 0) {
-      // Use fallback images while loading or when no results
-      const index = (row * 1000 + col) % sampleImages.length;
-      return { imageUrl: sampleImages[index] };
+      // Don't render anything while loading or when no results
+      return null;
     }
     
-    const index = (row * 1000 + col) % filteredTools.length;
+    // Better distribution: use a prime number for columns to avoid patterns
+    const index = (row * 97 + col) % filteredTools.length;
     const tool = filteredTools[index];
     return { 
       imageUrl: tool.image_link,
@@ -280,9 +245,9 @@ export default function InfiniteGrid({
         currentTimeouts.set(cellKey, timeout);
       });
     } else {
-      // Default animation: simple sequential stagger
+      // Default animation: rapid sequential stagger - boom boom boom
       cellsToAnimate.forEach((cellKey, index) => {
-        const delay = index * 20;
+        const delay = index * 8; // Super fast 8ms between each
         const timeout = setTimeout(() => {
           setAnimatedCells((prev) => new Set(prev).add(cellKey));
           currentTimeouts.delete(cellKey);
@@ -439,7 +404,12 @@ export default function InfiniteGrid({
               {virtualColumns.map((virtualColumn) => {
                 const cellKey = `${virtualRow.index}-${virtualColumn.index}`;
                 const isAnimated = animatedCells.has(cellKey);
-                const { imageUrl, tool } = getToolForCell(virtualRow.index, virtualColumn.index);
+                const cellData = getToolForCell(virtualRow.index, virtualColumn.index);
+                
+                // Don't render if no data (loading or no results)
+                if (!cellData) return null;
+                
+                const { imageUrl, tool } = cellData;
 
                 return (
                   <div
