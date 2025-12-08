@@ -6,7 +6,7 @@ import type { Tool } from "../lib/supabase";
 import { ToolUploadForm } from "../components/ToolUploadForm";
 import { useToast } from "../contexts/ToastContext";
 import { Upload } from "lucide-react";
-import { uploadImage, validateImageFile, downloadAndUploadImage } from "../lib/storage";
+import { uploadImage, validateImageFile, downloadAndUploadImage, deleteImage } from "../lib/storage";
 
 interface UserSuggestion {
   id: string;
