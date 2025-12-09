@@ -135,8 +135,8 @@ export default function InfiniteGrid({
       return null;
     }
     
-    // Better distribution: use a prime number for columns to avoid patterns
-    const index = (row * 97 + col) % filteredTools.length;
+    // Better distribution: use two primes for row and column to avoid patterns
+    const index = (row * 97 + col * 31) % filteredTools.length;
     const tool = filteredTools[index];
     return { 
       imageUrl: tool.image_link,
@@ -247,7 +247,7 @@ export default function InfiniteGrid({
     } else {
       // Default animation: rapid sequential stagger - boom boom boom
       cellsToAnimate.forEach((cellKey, index) => {
-        const delay = index * 8; // Super fast 8ms between each
+        const delay = index * 15; // Increased from 8ms to 15ms to reduce lag
         const timeout = setTimeout(() => {
           setAnimatedCells((prev) => new Set(prev).add(cellKey));
           currentTimeouts.delete(cellKey);
