@@ -362,16 +362,30 @@ export default function InfiniteGrid({
 
   return (
     <div className="h-dvh w-dvw flex justify-center items-center">
+      {/* Loading Spinner */}
+      {isLoading && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
+          <div className="w-12 h-12 border-4 border-gray-300 dark:border-gray-700 border-t-gray-900 dark:border-t-white rounded-full animate-spin"></div>
+          <div className="mt-4 text-gray-600 dark:text-gray-400 text-sm">Loading tools...</div>
+        </div>
+      )}
+
       {/* No Results Overlay */}
       {!isLoading && filteredTools.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
           <div className="text-center">
             <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              No tools found
+              Can't find what you're looking for?
             </div>
-            <div className="text-gray-600 dark:text-gray-400">
-              {searchQuery ? `Try a different search term` : `No tools in this category`}
+            <div className="text-gray-600 dark:text-gray-400 mb-6">
+              {searchQuery ? `No results for "${searchQuery}"` : `No tools in this category`}
             </div>
+            <button
+              onClick={() => window.location.href = '/submit'}
+              className="px-6 py-3 bg-black dark:bg-white dark:text-black text-white rounded-full font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors pointer-events-auto"
+            >
+              Request a Thing
+            </button>
           </div>
         </div>
       )}
