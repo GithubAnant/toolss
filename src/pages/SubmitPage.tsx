@@ -215,9 +215,6 @@ export function SubmitPage() {
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all"
                   placeholder="https://example.com/logo.png"
                 />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  We'll download this image and store it permanently in our storage
-                </p>
               </div>
             )}
             
