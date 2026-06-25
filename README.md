@@ -2,7 +2,7 @@
 
 # toolss™
 
-**The Best™ AI Tools Directory on the Internet**
+**The Best™ AI Tools Directory on the Internet (NO LONGER MAINTAINED)**
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-toolss-black?style=for-the-badge&logo=vercel)](https://toolss-eight.vercel.app)
 [![Submit Tool](https://img.shields.io/badge/➕_Submit_Tool-Contribute-blue?style=for-the-badge)](https://toolss-eight.vercel.app/submit)
